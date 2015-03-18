@@ -3,4 +3,4 @@ __author__ = "aganezov"
 __email__ = "aganezov(at)gwu.edu"
 __status__ = "development"
 
-version = "0.0.0"
+version = "0.0.1"
