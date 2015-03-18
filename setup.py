@@ -13,7 +13,7 @@ setup(
     author="Sergey Aganezov",
     author_email="aganezov@gwu.edu",
     description="Gene order based scaffolding tool for multiple genomes",
-    license="GPLv3",
+    license="LGPLv3",
     keywords=["breakpoint graph", "data structures", "python", "scaffolding", "gene order"],
     url="https://github.com/sergey-aganezov-jr/gos",
     classifiers=[
