@@ -42,8 +42,9 @@ def barplot_evaluation(lines, x_ticks_labels,
             bar = Bar()
             bar.xValues = range(len(x_ticks_labels))
             bar.yValues = data[i][j]
-            bar.color = "red" if j % 2 == 1 else colors[i]  # all "false positive values" are colored red,
-                                                            # while "true positives" change from tool to tool
+            # all "false positive values" are colored red,
+            # while "true positives" change from tool to tool
+            bar.color = "red" if j % 2 == 1 else colors[i]
             bar.label = labels[i]
             stack.add(bar)
         cluster.add(stack)
