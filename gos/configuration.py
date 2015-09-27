@@ -53,6 +53,7 @@ class Configuration(dict):
     ############################################################################################################
 
     # top level keys
+    LOGGER_NAME = 'LOGGER_NAME'
     LOGGING_FORMAT = 'LOGGING_FORMAT'
     LOGGING_LEVEL = 'LOGGING_LEVEL'
     INPUT = 'INPUT'
@@ -113,6 +114,7 @@ class Configuration(dict):
                 self.LOGGING_LEVEL: logging.INFO,
                 self.LOGGING_FORMAT: '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                 self.IO_DESTINATION: 'log.txt',
+                self.LOGGER_NAME: 'AssemblyManager',
                 self.IO_SILENT_FAIL: True,
                 self.ENABLE_IO_LOGGING: True,
                 self.BREAKPOINT_GRAPH_CONSTRUCTION: '',

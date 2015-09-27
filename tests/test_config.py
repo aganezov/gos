@@ -33,6 +33,8 @@ class ConfigTestCase(unittest.TestCase):
         # logging configuration
         self.assertIn(Configuration.LOGGING_LEVEL, config[Configuration.LOGGING])
         self.assertIn(Configuration.LOGGING_FORMAT, config[Configuration.LOGGING])
+        self.assertIn(Configuration.LOGGER_NAME, config[Configuration.LOGGING])
+        self.assertEqual(config[Configuration.LOGGING][Configuration.LOGGER_NAME], 'AssemblyManager')
         self.assertIn(Configuration.IO_SILENT_FAIL, config[Configuration.LOGGING])
         self.assertIn(Configuration.IO_DESTINATION, config[Configuration.LOGGING])
         self.assertIn(Configuration.ENABLE_IO_LOGGING, config[Configuration.LOGGING])
