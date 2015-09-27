@@ -26,3 +26,5 @@ class AssemblyManager(object):
         self.breakpoint_graph = None
         self.phylogenetic_tree = None
         self.target_organisms = None
+
+        self.logger.info('Assembly manager Initialization')
