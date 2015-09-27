@@ -1,5 +1,6 @@
 import os
 import unittest
+import shutil
 from gos.assembler import AssemblyManager
 from gos.configuration import Configuration
 
@@ -10,18 +11,13 @@ class AssemblerManagerTestCase(unittest.TestCase):
     def setUp(self):
         self.config = Configuration()
         self.output_dir_name = self.config[Configuration.OUTPUT][Configuration.OUTPUT_DIRECTORY]
-        try:
-            os.stat(self.output_dir_name)
-        except IOError:
+        if not os.path.exists(self.output_dir_name):
             os.mkdir(self.output_dir_name)
         self.assembler_manager = AssemblyManager()
 
     def tearDown(self):
-        try:
-            os.stat(self.output_dir_name)
-            os.rmdir(self.output_dir_name)
-        except IOError:
-            pass
+        if os.path.exists(self.output_dir_name):
+            shutil.rmtree(self.output_dir_name)
 
     def test_empty_initialization(self):
         manager = AssemblyManager()
