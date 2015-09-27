@@ -3,6 +3,7 @@ import unittest
 import shutil
 from gos.assembler import AssemblyManager
 from gos.configuration import Configuration
+from tests.test_logging import MockingLoggingHandler
 
 __author__ = 'aganezov'
 
@@ -14,6 +15,10 @@ class AssemblerManagerTestCase(unittest.TestCase):
         if not os.path.exists(self.output_dir_name):
             os.mkdir(self.output_dir_name)
         self.assembler_manager = AssemblyManager()
+        self.assembler_manager.logger.handlers = []
+        self.mocking_handler = MockingLoggingHandler()
+        self.mocking_handler.reset()
+        self.assembler_manager.logger.addHandler(self.mocking_handler)
 
     def tearDown(self):
         if os.path.exists(self.output_dir_name):
@@ -25,12 +30,14 @@ class AssemblerManagerTestCase(unittest.TestCase):
         self.assertIsNotNone(manager.logger)
 
     def test_default_logger_name(self):
-        self.assertEqual(self.assembler_manager.logger.name,
-                         self.assembler_manager.config[Configuration.LOGGING][Configuration.LOGGER_NAME])
+        assembler_manager = AssemblyManager()
+        self.assertEqual(assembler_manager.logger.name,
+                         assembler_manager.config[Configuration.LOGGING][Configuration.LOGGER_NAME])
 
     def test_logger_format(self):
-        self.assertEqual(self.assembler_manager.logger.level,
-                         self.assembler_manager.config[Configuration.LOGGING][Configuration.LOGGING_LEVEL])
+        assembler_manager = AssemblyManager()
+        self.assertEqual(assembler_manager.logger.level,
+                         assembler_manager.config[Configuration.LOGGING][Configuration.LOGGING_LEVEL])
 
 
 if __name__ == '__main__':
