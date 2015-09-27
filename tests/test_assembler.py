@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 import shutil
@@ -16,8 +17,10 @@ class AssemblerManagerTestCase(unittest.TestCase):
             os.mkdir(self.output_dir_name)
         self.assembler_manager = AssemblyManager()
         self.assembler_manager.logger.handlers = []
-        self.mocking_handler = MockingLoggingHandler()
+        self.mocking_handler = MockingLoggingHandler(level=self.config[Configuration.LOGGING][Configuration.LOGGING_LEVEL])
+        self.mocking_handler.setFormatter(logging.Formatter(self.config[Configuration.LOGGING][Configuration.LOGGING_FORMAT]))
         self.mocking_handler.reset()
+        self.mocking_handler.name = self.config[Configuration.LOGGING][Configuration.LOGGER_NAME]
         self.assembler_manager.logger.addHandler(self.mocking_handler)
 
     def tearDown(self):
@@ -30,14 +33,12 @@ class AssemblerManagerTestCase(unittest.TestCase):
         self.assertIsNotNone(manager.logger)
 
     def test_default_logger_name(self):
-        assembler_manager = AssemblyManager()
-        self.assertEqual(assembler_manager.logger.name,
-                         assembler_manager.config[Configuration.LOGGING][Configuration.LOGGER_NAME])
+        self.assertEqual(self.assembler_manager.logger.name,
+                         self.assembler_manager.config[Configuration.LOGGING][Configuration.LOGGER_NAME])
 
     def test_logger_format(self):
-        assembler_manager = AssemblyManager()
-        self.assertEqual(assembler_manager.logger.level,
-                         assembler_manager.config[Configuration.LOGGING][Configuration.LOGGING_LEVEL])
+        self.assertEqual(self.assembler_manager.logger.level,
+                         self.assembler_manager.config[Configuration.LOGGING][Configuration.LOGGING_LEVEL])
 
 
 if __name__ == '__main__':
