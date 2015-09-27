@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 __author__ = "aganezov"
 __email__ = "aganezov(at)gwu.edu"
 __status__ = "development"
@@ -51,6 +53,8 @@ class Configuration(dict):
     ############################################################################################################
 
     # top level keys
+    LOGGING_FORMAT = 'LOGGING_FORMAT'
+    LOGGING_LEVEL = 'LOGGING_LEVEL'
     INPUT = 'INPUT'
     LOGGING = 'LOGGING'
     PROCESSING = 'PROCESSING'
@@ -106,6 +110,8 @@ class Configuration(dict):
             }
         if self.LOGGING not in self:
             self[self.LOGGING] = {
+                self.LOGGING_LEVEL: logging.INFO,
+                self.LOGGING_FORMAT: '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                 self.IO_DESTINATION: 'log.txt',
                 self.IO_SILENT_FAIL: True,
                 self.ENABLE_IO_LOGGING: True,

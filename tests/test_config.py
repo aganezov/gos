@@ -31,6 +31,8 @@ class ConfigTestCase(unittest.TestCase):
         self.assertIn(Configuration.IO_SILENT_FAIL, config[Configuration.INPUT][Configuration.TREE])
 
         # logging configuration
+        self.assertIn(Configuration.LOGGING_LEVEL, config[Configuration.LOGGING])
+        self.assertIn(Configuration.LOGGING_FORMAT, config[Configuration.LOGGING])
         self.assertIn(Configuration.IO_SILENT_FAIL, config[Configuration.LOGGING])
         self.assertIn(Configuration.IO_DESTINATION, config[Configuration.LOGGING])
         self.assertIn(Configuration.ENABLE_IO_LOGGING, config[Configuration.LOGGING])
