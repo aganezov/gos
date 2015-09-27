@@ -22,3 +22,7 @@ class AssemblyManager(object):
             handler.setFormatter(logging.Formatter(self.config[Configuration.LOGGING][Configuration.LOGGING_FORMAT]))
             self.logger.setLevel(self.config[Configuration.LOGGING][Configuration.LOGGING_LEVEL])
             self.logger.addHandler(handler)
+
+        self.breakpoint_graph = None
+        self.phylogenetic_tree = None
+        self.target_organisms = None

@@ -31,6 +31,9 @@ class AssemblerManagerTestCase(unittest.TestCase):
         manager = AssemblyManager()
         self.assertIsNotNone(manager.config)
         self.assertIsNotNone(manager.logger)
+        self.assertIsNone(manager.breakpoint_graph)
+        self.assertIsNone(manager.phylogenetic_tree)
+        self.assertIsNone(manager.target_organisms)
 
     def test_default_logger_name(self):
         self.assertEqual(self.assembler_manager.logger.name,
