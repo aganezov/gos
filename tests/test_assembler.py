@@ -40,6 +40,7 @@ class AssemblerManagerTestCase(unittest.TestCase):
         self.assertIsNone(manager.breakpoint_graph)
         self.assertIsNone(manager.phylogenetic_tree)
         self.assertIsNone(manager.target_organisms)
+        self.assertIsNone(manager.fragments_data)
 
     def test_logging_on_initialization(self):
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_INFO]), 1)
