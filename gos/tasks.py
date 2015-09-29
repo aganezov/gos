@@ -11,7 +11,9 @@ class BaseTask(object):
 
     def __init__(self):
         self.sub_tasks = []
+        self.result = []
 
     def execute(self):
         for sub_task in self.sub_tasks:
-            sub_task.execute()
+            self.result.append(sub_task.execute())
+        return self.result

@@ -11,6 +11,8 @@ class BaseTaskTestCase(unittest.TestCase):
         self.assertTrue(callable(BaseTask().execute))
         self.assertTrue(hasattr(BaseTask(), 'sub_tasks'))
         self.assertIsInstance(BaseTask().sub_tasks, list)
+        self.assertTrue(hasattr(BaseTask(), 'result'))
+        self.assertIsInstance(BaseTask().result, list)
 
 if __name__ == '__main__':
     unittest.main()
