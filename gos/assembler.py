@@ -68,9 +68,12 @@ class AssemblyManager(object):
                     raise GOSIOError("No gene order file {file_name} was found".format(file_name=file_name))
 
     def read_phylogenetic_trees_data(self):
+        self.logger.debug('Creating a phylogenetic tree to incorporate relationships between different species')
         self.phylogenetic_tree = BGTree()
         silent_io_fail = self.config[Configuration.INPUT][Configuration.TREE][Configuration.IO_SILENT_FAIL]
+        self.logger.debug('"silent io fail" flag is set to {silent_io_fail}'.format(silent_io_fail=silent_io_fail))
         for file_name in self.config[Configuration.INPUT][Configuration.TREE][Configuration.SOURCE_FILES]:
+            self.logger.info('Processing phylogenetic tree file {file_name}'.format(file_name=file_name))
             try:
                 with open(file_name, mode="rt") as source:
                     for line in source:
@@ -86,3 +89,4 @@ class AssemblyManager(object):
                 self.logger.error("No phylogenetic tree file {file_name}.".format(file_name=file_name))
                 if silent_io_fail:
                     continue
+        self.logger.debug('Finished creating a phylogenetic tree')

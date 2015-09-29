@@ -210,6 +210,18 @@ class AssemblerManagerTestCase(unittest.TestCase):
                 raise AssertionError('Was unable to write test data into file containing tree information')
         return tmp_files
 
+    def test_logging_read_phylogenetic_tree_good_io(self):
+        tmp_files = self.create_temp_tree_files()
+        self.assign_temp_tree_files_into_config(tmp_files=tmp_files)
+        try:
+            self.assembler_manager.read_phylogenetic_trees_data()
+        finally:
+            self.close_tmp_files(tmp_files=tmp_files)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_INFO]), 2)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_DEBUG]), 3)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 0)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 0)
+
     def test_logging_read_phylogenetic_tree_bad_file_silent_fail(self):
         tmp_files = self.create_temp_tree_files()
         self.assign_temp_tree_files_into_config(tmp_files=tmp_files)
@@ -221,10 +233,6 @@ class AssemblerManagerTestCase(unittest.TestCase):
             self.close_tmp_files(tmp_files)
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 0)
-
-    def add_bad_tree_data_file(self, tmp_files):
-        bad_tree = ['a,,b']
-        self.add_bad_data_file(bad_tree, tmp_files=tmp_files)
 
     def test_read_phylogenetic_tree_bad_file_no_silent_fail(self):
         pass
@@ -241,6 +249,10 @@ class AssemblerManagerTestCase(unittest.TestCase):
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 0)
         self.assertTrue(self.assembler_manager.phylogenetic_tree.is_valid_tree)
+
+    def add_bad_tree_data_file(self, tmp_files):
+        bad_tree = ['a,,b']
+        self.add_bad_data_file(bad_tree, tmp_files=tmp_files)
 
 
 if __name__ == '__main__':
