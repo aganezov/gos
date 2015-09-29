@@ -66,63 +66,63 @@ class AssemblerManagerTestCase(unittest.TestCase):
                          assembler_manager.config[Configuration.LOGGING][Configuration.LOGGING_LEVEL])
 
     def test_read_breakpoint_graph_data_no_edge_merge_io_good(self):
-        tmp_files = self.assign_tmp_file_into_config()
+        tmp_files = self.assign_temp_genome_files_into_config()
         self.assembler_manager.config[Configuration.INPUT][Configuration.GENOMES][Configuration.MERGE_EDGES] = False
         try:
             self.assembler_manager.read_gene_order_data()
         finally:
-            self.close_tmp_genome_files(tmp_files)
+            self.close_tmp_files(tmp_files)
         self.assertIsNotNone(self.assembler_manager.breakpoint_graph)
         self.assertEqual(len(list(self.assembler_manager.breakpoint_graph.nodes())), 31)
         self.assertEqual(len(list(self.assembler_manager.breakpoint_graph.edges())), 36)
 
-    def close_tmp_genome_files(self, tmp_files):
+    def close_tmp_files(self, tmp_files):
         for file in tmp_files:
             file.close()
 
     def test_read_breakpoint_graph_data_with_edge_merge_io_good(self):
-        tmp_files = self.assign_tmp_file_into_config()
+        tmp_files = self.assign_temp_genome_files_into_config()
         self.assembler_manager.config[Configuration.INPUT][Configuration.GENOMES][Configuration.MERGE_EDGES] = True
         try:
             self.assembler_manager.read_gene_order_data()
         finally:
-            self.close_tmp_genome_files(tmp_files)
+            self.close_tmp_files(tmp_files)
         self.assertIsNotNone(self.assembler_manager.breakpoint_graph)
         self.assertEqual(len(list(self.assembler_manager.breakpoint_graph.nodes())), 31)  # 18 regular nodes + 13 infinity nodes
         self.assertEqual(len(list(self.assembler_manager.breakpoint_graph.edges())), 30)
 
     def test_logging_read_breakpoint_graph_good_io(self):
-        tmp_files = self.assign_tmp_file_into_config()
+        tmp_files = self.assign_temp_genome_files_into_config()
         self.assembler_manager.config[Configuration.INPUT][Configuration.GENOMES][Configuration.MERGE_EDGES] = False
         try:
             self.assembler_manager.read_gene_order_data()
         finally:
-            self.close_tmp_genome_files(tmp_files)
+            self.close_tmp_files(tmp_files)
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_INFO]), 3)  # single entry for every file processing
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_DEBUG]), 3)  # indication of start + info about edges merge
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 0)  # io shall be good and data shall be good
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 0)  # nothing critical shall have happened
 
     def test_logging_read_breakpoint_graph_bad_file_silent_fail(self):
-        tmp_files = self.assign_tmp_file_into_config()
+        tmp_files = self.assign_temp_genome_files_into_config()
         self.assembler_manager.config[Configuration.INPUT][Configuration.GENOMES][Configuration.IO_SILENT_FAIL] = True
         self.assembler_manager.config[Configuration.INPUT][Configuration.GENOMES][Configuration.SOURCE_FILES].append("bad_file_name")
         try:
             self.assembler_manager.read_gene_order_data()
         finally:
-            self.close_tmp_genome_files(tmp_files)
+            self.close_tmp_files(tmp_files)
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)  # error of non existing file
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 0)  # silent fail is executed an application continues
 
     def test_logging_read_breakpoint_graph_bad_file_no_silent_fail(self):
-        tmp_files = self.assign_tmp_file_into_config()
+        tmp_files = self.assign_temp_genome_files_into_config()
         self.assembler_manager.config[Configuration.INPUT][Configuration.GENOMES][Configuration.IO_SILENT_FAIL] = False
         self.assembler_manager.config[Configuration.INPUT][Configuration.GENOMES][Configuration.SOURCE_FILES].append("bad_file_name")
         try:
             with self.assertRaises(GOSIOError):
                 self.assembler_manager.read_gene_order_data()
         finally:
-            self.close_tmp_genome_files(tmp_files)
+            self.close_tmp_files(tmp_files)
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)  # error of non existing file
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 1)
         # silent fail is not executed and application raises exception and logs it
@@ -136,7 +136,7 @@ class AssemblerManagerTestCase(unittest.TestCase):
         try:
             self.assembler_manager.read_gene_order_data()
         finally:
-            self.close_tmp_genome_files(tmp_files)
+            self.close_tmp_files(tmp_files)
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)  # encounter bad grimm format is logged
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 0)  # silent fail is executed and application continues
 
@@ -157,11 +157,11 @@ class AssemblerManagerTestCase(unittest.TestCase):
             with self.assertRaises(GOSIOError):
                 self.assembler_manager.read_gene_order_data()
         finally:
-            self.close_tmp_genome_files(tmp_files)
+            self.close_tmp_files(tmp_files)
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)  # encounter bad grimm format is logged
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 1)  # silent fail is not executed and application raises an exception
 
-    def assign_tmp_file_into_config(self):
+    def assign_temp_genome_files_into_config(self):
         tmp_files = self.create_temp_genome_files()
         self.assembler_manager.config[Configuration.INPUT][Configuration.GENOMES][Configuration.SOURCE_FILES] = [tmp_file.name for tmp_file in
                                                                                                                  tmp_files]
@@ -181,7 +181,31 @@ class AssemblerManagerTestCase(unittest.TestCase):
         return tmp_files
 
     def test_read_phylogenetic_tree_good_io(self):
-        pass
+        tmp_files = self.create_temp_tree_files()
+        self.assign_temp_tree_files_into_config(tmp_files)
+        try:
+            self.assembler_manager.read_phylogenetic_trees_data()
+        finally:
+            self.close_tmp_files(tmp_files)
+        self.assertIsNotNone(self.assembler_manager.phylogenetic_tree)
+        self.assertEqual(len(list(self.assembler_manager.phylogenetic_tree.nodes())), 7)
+        self.assertEqual(len(list(self.assembler_manager.phylogenetic_tree.edges())), 6)
+        self.assertTrue(self.assembler_manager.phylogenetic_tree.is_valid_tree)
+
+    def assign_temp_tree_files_into_config(self, tmp_files):
+        self.assembler_manager.config[Configuration.INPUT][Configuration.TREE][Configuration.SOURCE_FILES] = [tmp_file.name for tmp_file in tmp_files]
+
+    def create_temp_tree_files(self):
+        tmp_files = [tempfile.NamedTemporaryFile(suffix=".newick", mode="wt", dir=self.input_dir, delete=True) for _ in range(2)]
+        tree_1 = ['((A)C,(E)D)Z;']
+        tree_2 = ['((B)C,(F)D)Z;']
+        for file, tree_data in zip(tmp_files, [tree_1, tree_2]):
+            try:
+                file.writelines(tree_data)
+                file.flush()
+            except IOError:
+                raise AssertionError('Was unable to write test data into file containing tree information')
+        return tmp_files
 
     def test_read_phylogenetic_tree_bad_file_silent_fail(self):
         pass

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from bg import BreakpointGraph
+from bg import BreakpointGraph, BGTree, NewickReader
 from bg.bg_io import GRIMMReader
 from gos.exceptions import GOSIOError
 import os
@@ -66,3 +66,12 @@ class AssemblyManager(object):
                                          "Silent io fail flag is set to {silent_io_fail}, application can not continue"
                                          "".format(file_name=file_name, silent_io_fail=silent_io_fail))
                     raise GOSIOError("No gene order file {file_name} was found".format(file_name=file_name))
+
+    def read_phylogenetic_trees_data(self):
+        self.phylogenetic_tree = BGTree()
+        for file_name in self.config[Configuration.INPUT][Configuration.TREE][Configuration.SOURCE_FILES]:
+            with open(file_name, mode="rt") as source:
+                for line in source:
+                    line = line.strip()
+                    if len(line) > 0:
+                        self.phylogenetic_tree.append(NewickReader.from_string(line))
