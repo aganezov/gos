@@ -85,6 +85,11 @@ class AssemblyManager(object):
                                   "".format(file_name=file_name, error_message=err))
                 if silent_io_fail:
                     continue
+                else:
+                    self.logger.critical('Error during processing of phylogenetic tree data in file {file_name}'
+                                         '"silent io fail" flag is set {silent_io_fail}, application can not continue'
+                                         ''.format(file_name=file_name, silent_io_fail=silent_io_fail))
+                    raise GOSIOError('Error during processing file {file_name} with phylogenetic tree data'.format(file_name=file_name))
             except FileNotFoundError:
                 self.logger.error("No phylogenetic tree file {file_name}.".format(file_name=file_name))
                 if silent_io_fail:
