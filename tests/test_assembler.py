@@ -235,7 +235,17 @@ class AssemblerManagerTestCase(unittest.TestCase):
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 0)
 
     def test_read_phylogenetic_tree_bad_file_no_silent_fail(self):
-        pass
+        tmp_files = self.create_temp_tree_files()
+        self.assign_temp_tree_files_into_config(tmp_files=tmp_files)
+        self.assembler_manager.config[Configuration.INPUT][Configuration.TREE][Configuration.SOURCE_FILES].append('bad_tree_file.newick')
+        self.assembler_manager.config[Configuration.INPUT][Configuration.TREE][Configuration.IO_SILENT_FAIL] = False
+        try:
+            with self.assertRaises(GOSIOError):
+                self.assembler_manager.read_phylogenetic_trees_data()
+        finally:
+            self.close_tmp_files(tmp_files)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 1)
 
     def test_logging_read_phylogenetic_tree_bad_data_silent_fail_valid_tree(self):
         tmp_files = self.create_temp_tree_files()
