@@ -142,8 +142,11 @@ class AssemblerManagerTestCase(unittest.TestCase):
 
     def add_bad_grimm_data_file(self, tmp_files):
         bad_genome = ['>genome 4\n', '1 2 3 $\n', '4 5 - - -6$\n', '7 8 9 $\n']
+        self.add_bad_data_file(bad_genome, tmp_files)
+
+    def add_bad_data_file(self, data, tmp_files):
         tmp_bad_file = tempfile.NamedTemporaryFile(suffix='.grimm', dir=self.input_dir, delete=True, mode='w+t')
-        tmp_bad_file.writelines(bad_genome)
+        tmp_bad_file.writelines(data)
         tmp_bad_file.flush()
         tmp_files.append(tmp_bad_file)
 
@@ -210,14 +213,25 @@ class AssemblerManagerTestCase(unittest.TestCase):
     def test_read_phylogenetic_tree_bad_file_silent_fail(self):
         pass
 
+    def add_bad_tree_data_file(self, tmp_files):
+        bad_tree = ['a,,b']
+        self.add_bad_data_file(bad_tree, tmp_files=tmp_files)
+
     def test_read_phylogenetic_tree_bad_file_no_silent_fail(self):
         pass
 
-    def test_read_phylogenetic_tree_bad_data_silent_fail(self):
-        pass
-
-    def test_read_phylogenetic_tree_bad_data_no_silent_fail(self):
-        pass
+    def test_logging_read_phylogenetic_tree_bad_data_silent_fail_valid_tree(self):
+        tmp_files = self.create_temp_tree_files()
+        self.add_bad_tree_data_file(tmp_files=tmp_files)
+        self.assign_temp_tree_files_into_config(tmp_files=tmp_files)
+        self.assembler_manager.config[Configuration.INPUT][Configuration.TREE][Configuration.IO_SILENT_FAIL] = True
+        try:
+            self.assembler_manager.read_phylogenetic_trees_data()
+        finally:
+            self.close_tmp_files(tmp_files)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 0)
+        self.assertTrue(self.assembler_manager.phylogenetic_tree.is_valid_tree)
 
 
 if __name__ == '__main__':

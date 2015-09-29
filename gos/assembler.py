@@ -69,9 +69,16 @@ class AssemblyManager(object):
 
     def read_phylogenetic_trees_data(self):
         self.phylogenetic_tree = BGTree()
+        silent_io_fail = self.config[Configuration.INPUT][Configuration.TREE][Configuration.IO_SILENT_FAIL]
         for file_name in self.config[Configuration.INPUT][Configuration.TREE][Configuration.SOURCE_FILES]:
             with open(file_name, mode="rt") as source:
                 for line in source:
                     line = line.strip()
                     if len(line) > 0:
-                        self.phylogenetic_tree.append(NewickReader.from_string(line))
+                        try:
+                            self.phylogenetic_tree.append(NewickReader.from_string(line))
+                        except ValueError as err:
+                            self.logger.error("Error during processing of {file_name}: {error_message}"
+                                              "".format(file_name=file_name, error_message=err))
+                            if silent_io_fail:
+                                continue
