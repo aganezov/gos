@@ -91,4 +91,8 @@ class AssemblyManager(object):
                                          '"silent io fail" flag is set {silent_io_fail} application can not continue'
                                          ''.format(file_name=file_name, silent_io_fail=silent_io_fail))
                     raise GOSIOError('No file {file_name} with phylogenetic tree data was found'.format(file_name=file_name))
+        if not self.phylogenetic_tree.is_valid_tree:
+            self.logger.critical("Error. Supplied phylogenetic tree data resulted in non-valid tree topology. "
+                                 "Application can not continue.")
+            raise ValueError("Non valid topology for phylogenetic tree")
         self.logger.debug('Finished creating a phylogenetic tree')

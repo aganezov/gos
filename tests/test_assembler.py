@@ -142,10 +142,10 @@ class AssemblerManagerTestCase(unittest.TestCase):
 
     def add_bad_grimm_data_file(self, tmp_files):
         bad_genome = ['>genome 4\n', '1 2 3 $\n', '4 5 - - -6$\n', '7 8 9 $\n']
-        self.add_bad_data_file(bad_genome, tmp_files)
+        self.add_bad_data_file(bad_genome, tmp_files, ".grimm")
 
-    def add_bad_data_file(self, data, tmp_files):
-        tmp_bad_file = tempfile.NamedTemporaryFile(suffix='.grimm', dir=self.input_dir, delete=True, mode='w+t')
+    def add_bad_data_file(self, data, tmp_files, suffix):
+        tmp_bad_file = tempfile.NamedTemporaryFile(suffix=suffix, dir=self.input_dir, delete=True, mode='w+t')
         tmp_bad_file.writelines(data)
         tmp_bad_file.flush()
         tmp_files.append(tmp_bad_file)
@@ -273,9 +273,23 @@ class AssemblerManagerTestCase(unittest.TestCase):
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)
         self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 1)
 
+    def test_read_phylogenetic_tree_non_valid_tree_fail(self):
+        tmp_files = self.create_temp_tree_files()
+        bad_data_portion = ['(E,F)O;']
+        self.add_bad_data_file(tmp_files=tmp_files, data=bad_data_portion, suffix=".newick")
+        self.assign_temp_tree_files_into_config(tmp_files=tmp_files)
+        try:
+            with self.assertRaises(ValueError):
+                self.assembler_manager.read_phylogenetic_trees_data()
+        finally:
+            self.close_tmp_files(tmp_files)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 0)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 1)
+        self.assertFalse(self.assembler_manager.phylogenetic_tree.is_valid_tree)
+
     def add_bad_tree_data_file(self, tmp_files):
         bad_tree = ['a,,b']
-        self.add_bad_data_file(bad_tree, tmp_files=tmp_files)
+        self.add_bad_data_file(bad_tree, tmp_files=tmp_files, suffix=".newick")
 
 
 if __name__ == '__main__':
