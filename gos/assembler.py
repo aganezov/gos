@@ -49,9 +49,7 @@ class AssemblyManager(object):
                 self.logger.error("Error during processing of {file_name}: (error_message)".format(file_name=file_name,
                                                                                                    error_message=err))
                 self.logger.debug("Silent io fail is set {silent_fail}".format(silent_fail=silent_io_fail))
-                if silent_io_fail:
-                    continue
-                else:
+                if not silent_io_fail:
                     self.logger.critical("Error during processing of gene order file {file_name}. "
                                          "Silent io fail flag is set to {silent_io_fail}, application can not continue"
                                          "".format(file_name=file_name, silent_io_fail=silent_io_fail))
@@ -59,9 +57,7 @@ class AssemblyManager(object):
             except FileNotFoundError:
                 self.logger.error("No gene order file {file_name} was found".format(file_name=file_name))
                 self.logger.debug("Silent io fail is set {silent_fail}".format(silent_fail=silent_io_fail))
-                if silent_io_fail:
-                    continue
-                else:
+                if not silent_io_fail:
                     self.logger.critical("Error during search for gene order file {file_name}. "
                                          "Silent io fail flag is set to {silent_io_fail}, application can not continue"
                                          "".format(file_name=file_name, silent_io_fail=silent_io_fail))
@@ -83,18 +79,14 @@ class AssemblyManager(object):
             except ValueError as err:
                 self.logger.error("Error during processing of {file_name}: {error_message}"
                                   "".format(file_name=file_name, error_message=err))
-                if silent_io_fail:
-                    continue
-                else:
+                if not silent_io_fail:
                     self.logger.critical('Error during processing of phylogenetic tree data in file {file_name}'
                                          '"silent io fail" flag is set {silent_io_fail}, application can not continue'
                                          ''.format(file_name=file_name, silent_io_fail=silent_io_fail))
                     raise GOSIOError('Error during processing file {file_name} with phylogenetic tree data'.format(file_name=file_name))
             except FileNotFoundError:
                 self.logger.error("No phylogenetic tree file {file_name}.".format(file_name=file_name))
-                if silent_io_fail:
-                    continue
-                else:
+                if not silent_io_fail:
                     self.logger.critical('Error during search for phylogenetic tree file {file_name}. '
                                          '"silent io fail" flag is set {silent_io_fail} application can not continue'
                                          ''.format(file_name=file_name, silent_io_fail=silent_io_fail))
