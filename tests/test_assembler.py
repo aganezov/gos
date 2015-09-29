@@ -210,8 +210,17 @@ class AssemblerManagerTestCase(unittest.TestCase):
                 raise AssertionError('Was unable to write test data into file containing tree information')
         return tmp_files
 
-    def test_read_phylogenetic_tree_bad_file_silent_fail(self):
-        pass
+    def test_logging_read_phylogenetic_tree_bad_file_silent_fail(self):
+        tmp_files = self.create_temp_tree_files()
+        self.assign_temp_tree_files_into_config(tmp_files=tmp_files)
+        self.assembler_manager.config[Configuration.INPUT][Configuration.TREE][Configuration.SOURCE_FILES].append('bad_tree_file.newick')
+        self.assembler_manager.config[Configuration.INPUT][Configuration.TREE][Configuration.IO_SILENT_FAIL] = True
+        try:
+            self.assembler_manager.read_phylogenetic_trees_data()
+        finally:
+            self.close_tmp_files(tmp_files)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_ERROR]), 1)
+        self.assertEqual(len(self.mocking_handler.messages[LOGGING_CRITICAL]), 0)
 
     def add_bad_tree_data_file(self, tmp_files):
         bad_tree = ['a,,b']
