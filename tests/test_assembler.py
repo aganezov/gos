@@ -180,6 +180,21 @@ class AssemblerManagerTestCase(unittest.TestCase):
                 raise AssertionError("Was unable to write genome data to temporary files")
         return tmp_files
 
+    def test_read_phylogenetic_tree_good_io(self):
+        pass
+
+    def test_read_phylogenetic_tree_bad_file_silent_fail(self):
+        pass
+
+    def test_read_phylogenetic_tree_bad_file_no_silent_fail(self):
+        pass
+
+    def test_read_phylogenetic_tree_bad_data_silent_fail(self):
+        pass
+
+    def test_read_phylogenetic_tree_bad_data_no_silent_fail(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()
