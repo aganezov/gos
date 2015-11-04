@@ -8,7 +8,7 @@ from gos.configuration import Configuration
 
 __author__ = "aganezov"
 __email__ = "aganezov(at)gwu.edu"
-__status__ = "development"
+__status__ = "dev"
 
 
 class AssemblyManager(object):
