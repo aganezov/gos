@@ -8,7 +8,7 @@ from gos import version as gos_version
 setup(
     name="gos",
     version=gos_version,
-    packages=["gos"],
+    packages=["gos", "tests"],
     install_requires=list(map(lambda entry: entry.strip(), open("requirements.txt", "rt").readlines())),
     author="Sergey Aganezov",
     author_email="aganezov@gwu.edu",
