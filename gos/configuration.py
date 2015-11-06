@@ -23,5 +23,28 @@ class Configuration(dict):
             - name: genome1_name
             - name: genome2_name
             - name: genome3_name
+
+
+
+    output:
+        dir: .->dir + output/
+        logger: .->logger
+        io_silent_fail: .->io_silent_fail
+        stats:
+            dir: output->dir + stats/
+            file: stats.txt
+            logger: output->logger
+            io_silent_fail: output->io_silent_fail
+        assembly_points:
+            dir: output->dir + assembly_points/
+            file: assembly_points.txt
+            logger: output->logger
+            io_silent_fail: output->io_silent_fail
+            genome_specific: true
+        genomes:
+            dir: output->dir + genomes/
+            output_non_glued_fragments: false
+            logger: output->logger
+            io_silent_fail: output->io_silent_fail
     """
     pass
