@@ -27,24 +27,38 @@ class Configuration(dict):
 
 
     output:
-        dir: .->dir + output/
-        logger: .->logger
-        io_silent_fail: .->io_silent_fail
-        stats:
-            dir: output->dir + stats/
-            file: stats.txt
-            logger: output->logger
-            io_silent_fail: output->io_silent_fail
-        assembly_points:
-            dir: output->dir + assembly_points/
-            file: assembly_points.txt
-            logger: output->logger
-            io_silent_fail: output->io_silent_fail
-            genome_specific: true
-        genomes:
-            dir: output->dir + genomes/
-            output_non_glued_fragments: false
-            logger: output->logger
-            io_silent_fail: output->io_silent_fail
+        dir: .->dir + output/                             # -- directory for all output files to be put. Used for further paths construction
+        logger: .->logger                                 # -- logger specification tp be utilized in the output section
+        io_silent_fail: .->io_silent_fail                 # -- output section wide setting to fail or not when an exception
+                                                          #    has occurred during the source file processing. Can be overwritten
+                                                          #    by output section specific variable
+                                                          #################################################################################
+        stats:                                            # -- output section which handles all the statistics output for current
+                                                          #    scaffolder execution
+            dir: output->dir + stats/                     # -- directory where statistics files will be located
+            file: stats.txt                               # -- default file name for the overall statistics file
+            logger: output->logger                        #
+            io_silent_fail: output->io_silent_fail        #
+                                                          #################################################################################
+        assembly_points:                                  # -- output section which handles all the information output about assembly
+                                                          #    points during scaffolder run
+            dir: output->dir + assembly_points/           # -- directory where assembly points file will be located
+            file: assembly_points.txt                     # -- default name for the overall statistic
+            logger: output->logger                        #
+            io_silent_fail: output->io_silent_fail        #
+            genome_specific: true                         # -- when specified, besides the overall file with all assembly points for current
+                                                          #    scaffolder run, also "per-genome" files are created, that duplicate genome
+                                                          #    specific results
+                                                          #################################################################################
+            genome_specific_file_name_pattern: assembly_points_{genome_name}.txt    # pattern for genome_specific file name creation
+                                                          #################################################################################
+                                                          #################################################################################
+        genomes:                                          # -- output section where information about genomes fragments will be stored
+            dir: output->dir + genomes/                   # -- directory where all genomes will ba located
+            output_non_glued_fragments: false             # -- if specified, all input information about genomes will be outputted,
+                                                          #    if set to false, only those fragments, that we involved in at least one
+                                                          #    gluing will be present in the output
+            logger: output->logger                        #
+            io_silent_fail: output->io_silent_fail        #
     """
     pass
