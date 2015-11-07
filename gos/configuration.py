@@ -114,10 +114,5 @@ class Configuration(dict):
                                                           #    gluing will be present in the output
             logger: output->logger                        #
             io_silent_fail: output->io_silent_fail        #
-            - path: file1_path
-              format: grimm
-              io_silent_fail: input->io_silent_fail
-            - path: file2_path
-            - path: file3_path
     """
     pass
