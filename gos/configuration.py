@@ -9,8 +9,21 @@ class Configuration(dict):
     """
     Structure, not yaml, just similar looking. It is just a description.
 
-    input:
-        source:
+    dir: ./                                               # -- directory, that is used further for creation of relative subdirectories
+                                                          #    current working directory by default
+    logger:                                               #
+        name: GOSLogger                                   #
+        level: info                                       #  -- by default only info messages are shown
+                                                          #
+        format: %(asctime)s - %(name)s - %(levelname)s - %(message)s  #
+                                                          #
+        destination: sys.stdout                           # -- by default all logging messages are shown to the standard output
+                                                          #
+    io_silent_fail: false                                 # -- by default if any IO exception happens, program will terminate
+                                                          ########################################################################
+                                                          ########################################################################
+    input:                                                #
+        source:                                           #
             - path: file1_path                            # -- relative (to input->dir) path to file with genome data
               format: grimm                               # -- determines which reader is going ot process the source file
                                                           #    if not specified, automatically retrieved from file extension
