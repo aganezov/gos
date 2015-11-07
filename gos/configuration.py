@@ -35,7 +35,53 @@ class Configuration(dict):
                                                           ########################################################################
             - name: genome2_name                          #
             - name: genome3_name                          #
-    output:                                               #
+                                                          ########################################################################
+    algorithm:                                            ########################################################################
+        io_silent_fail: .-> io_silent_fail                # -- if any part of an algorithm performs io operation, this flag determines what
+                                                          #    to do if an IO exception is thrown
+        logger: .->logger                                 # --
+        tasks:                                            # -- single processing entity specification
+            paths: []                                     # -- unchangeable value is "./tasks". everything else specified will be appended
+                                                          #    to "./tasks" directory. All *.py files are observed and all classes,
+                                                          #    being subclasses of GOSTask will be processed and available for further usage
+                                                          #################################################################################
+        stages:                                           # -- section describing next level layer of processing entities "stages"
+            - name: stage1                                # -- unique name of a stages, that it can be referenced by later.
+              self_loop: false                            # -- flag determining if a stage must be executed again, after its first execution
+                                                          #    is finished.
+              tasks:                                      # -- ordered list of tasks that stage includes in itself and will execute
+                - task1                                   # -- name based reference to previously specified task
+                - task2                                   # --
+            - name: stage2                                # --
+              logger: algorithm->logger                   # -- logger can be specified uniquely for each stage.
+              self_loop: true                             # --
+              tasks:                                      # --
+                - task2                                   # --
+            - name: stage3                                # --
+              path: path_to_*.py_file                     # -- if "path" value is specified, the stage is loaded from specified .py file and
+                                                          #    its structure is retrieved from the class based attributes
+                                                          #################################################################################
+        rounds:                                           # -- section describing next level layer of processing entities "rounds"
+            - name: round1                                # -- unique name of a round, that can be referenced later
+              self_loop: false                            # -- flag determining if a round must be executed again, after its first execution
+                                                          #    is finished.
+              logger: algorithm->logger                   # -- logger can be specified uniquely for each stage.
+              stages:                                     # -- ordered list of stages that round includes in itself and will execute
+                - stage1                                  # --
+                - stage2                                  # --
+            - name: round2                                # --
+              path: path_to_*.py_file                     # -- if "path" value is specified, the round is loaded from specified .py file and
+                                                          #    its structure is retrieved from the class based attributes
+                                                          #################################################################################
+        pipeline:                                         # -- top level procession entity
+            logger: algorithm->logger                     # --
+            self_loop: false                              # --
+            rounds:                                       # -- ordered list of rounds that pipeline includes in itself and will execute
+                - round1                                  # --
+                - round2                                  # --
+                - round1                                  # --
+                                                          ########################################################################
+    output:                                               ########################################################################
         dir: .->dir + output/                             # -- directory for all output files to be put. Used for further paths construction
         logger: .->logger                                 # -- logger specification tp be utilized in the output section
         io_silent_fail: .->io_silent_fail                 # -- output section wide setting to fail or not when an exception
@@ -61,7 +107,6 @@ class Configuration(dict):
                                                           #################################################################################
             genome_specific_file_name_pattern: assembly_points_{genome_name}.txt    # pattern for genome_specific file name creation
                                                           #################################################################################
-                                                          #################################################################################
         genomes:                                          # -- output section where information about genomes fragments will be stored
             dir: output->dir + genomes/                   # -- directory where all genomes will ba located
             output_non_glued_fragments: false             # -- if specified, all input information about genomes will be outputted,
@@ -69,5 +114,10 @@ class Configuration(dict):
                                                           #    gluing will be present in the output
             logger: output->logger                        #
             io_silent_fail: output->io_silent_fail        #
+            - path: file1_path
+              format: grimm
+              io_silent_fail: input->io_silent_fail
+            - path: file2_path
+            - path: file3_path
     """
     pass
