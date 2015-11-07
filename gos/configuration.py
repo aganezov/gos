@@ -17,9 +17,9 @@ class Configuration(dict):
               io_silent_fail: input->io_silent_fail       # -- whether to fail or not if exception has occurred during data reading
                                                           #    file specific. defaults to input io_silent_fail setting.
                                                           ########################################################################
-            - path: file2_path
-            - path: file3_path
-        dir: /                                            # -- a directory to search for source files in. / by default
+            - path: file2_path                            #
+            - path: file3_path                            #
+        dir: .->dir + /input                              # -- a directory to search for source files in. / by default
                                                           ########################################################################
         io_silent_fail: .->io_silent_fail                 # -- input section wide setting whether to fail or not, when an exception
                                                           #    has occurred during the source file processing. Can be overwritten
@@ -33,7 +33,7 @@ class Configuration(dict):
                                                           #    must be unique among all observed genomes (specified and retrieved)
               aliases: [alias1, alias2, alias3]           # -- other genome names, to be identified by. must be unique per genome
                                                           ########################################################################
-            - name: genome2_name
-            - name: genome3_name
+            - name: genome2_name                          #
+            - name: genome3_name                          #
     """
     pass
