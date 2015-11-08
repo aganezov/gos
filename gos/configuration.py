@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 
 __author__ = "aganezov"
 __email__ = "aganezov(at)gwu.edu"
@@ -150,6 +151,9 @@ class Configuration(dict):
     PATH = "path"
     PATHS = "paths"
 
+    # predefined constants
+    DEFAULT_IOSF = False
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.DIR not in self:
@@ -212,3 +216,18 @@ class Configuration(dict):
             self[self.OUTPUT][self.GENOMES] = {}
         if self.STATS not in self[self.OUTPUT]:
             self[self.OUTPUT][self.STATS] = {}
+
+    def update_with_default_values(self):
+        """ Goes through all the configuration fields and predefines empty ones with default values
+
+        Top level:
+            `dir` field is predefined with current working directory value, in case of empty string or `None`
+            `io_silent_fail` field if predefined with :attr:`Configuration.DEFAULT_IOSF` in case of None or empty string
+
+        :return: Nothing, performs inplace changes
+        :rtype: `None`
+        """
+        if self[self.DIR] in ("", None):
+            self[self.DIR] = os.getcwd()
+        if self[self.IOSF] in ("", None):
+            self[self.IOSF] = self.DEFAULT_IOSF

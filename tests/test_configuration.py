@@ -1,9 +1,13 @@
+import os
 import unittest
 
 from gos.configuration import Configuration
 
 
 class ConfigurationTestCase(unittest.TestCase):
+    def setUp(self):
+        self.init_config = Configuration()
+
     def test_initialization_top_level(self):
         """ in simple initialization the top level section must be properly configured """
         config = Configuration()
@@ -71,6 +75,41 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertIsInstance(algorithm_section[config.TASKS], list)
         self.assertIsInstance(algorithm_section[config.PIPELINE], dict)
 
+    def test_update_with_default_top_level_dir_empty(self):
+        """ top level configuration field "dir" default fallback when it is not specified """
+        self.init_config[self.init_config.DIR] = None
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.DIR], os.getcwd())
+        self.init_config[self.init_config.DIR] = ""
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.DIR], os.getcwd())
+
+    def test_update_with_default_to_level_dir_predefined(self):
+        """ top level configuration field "dir" default fallback when it is specified """
+        self.init_config[self.init_config.DIR] = os.path.join("dir1", "dir2")
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.DIR], os.path.join("dir1", "dir2"))
+
+    def test_update_with_default_top_level_io_silent_fail_empty(self):
+        """ top level configuration field "io_silent_fail" default fallback when its not specified """
+        self.init_config[self.init_config.IOSF] = None
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.IOSF], self.init_config.DEFAULT_IOSF)
+        self.init_config[self.init_config.IOSF] = ""
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.IOSF], self.init_config.DEFAULT_IOSF)
+
+    def test_update_with_default_top_level_io_silent_fail_predefined(self):
+        """ top level configuration field "io_silent_fail" default fallback when its specified """
+        self.init_config[self.init_config.IOSF] = True
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.IOSF], True)
+        self.init_config[self.init_config.IOSF] = False
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.IOSF], False)
+        self.init_config[self.init_config.IOSF] = "CustomValue"  # anything that works for if
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.IOSF], "CustomValue")
 
 if __name__ == '__main__':
     unittest.main()
