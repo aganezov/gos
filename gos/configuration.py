@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from copy import deepcopy
 
 __author__ = "aganezov"
 __email__ = "aganezov(at)gwu.edu"
@@ -156,6 +157,7 @@ class Configuration(dict):
     DEFAULT_LOGGER_NAME = "GOSLogger"
     DEFAULT_LOGGER_LEVEL = "info"
     DEFAULT_LOGGER_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    DEFAULT_INPUT_DIR = "input"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -233,6 +235,12 @@ class Configuration(dict):
             `format` field is predefined with :attr:`Configuration.DEFAULT_LOGGER_LEVEL`. Field is set to str() of itself
             `destination` field if predefined with
 
+        Input section:
+            `dir` field is predefined with a relative path constructed with top level `dir` field and :attr:`Configuration.DEFAULT_INPUT_DIR`
+            `source` field is predefined with an empty list
+            `io_silent_fail` if predefined with a top level `io_silent_fail`
+            `logger` subsection if predefined by a top level `logger` section it substitutes all the missing values in `input` `logger` subsection
+
         :return: Nothing, performs inplace changes
         :rtype: `None`
         """
@@ -251,3 +259,15 @@ class Configuration(dict):
         if self[self.LOGGER][self.FORMAT] in ("", None):
             self[self.LOGGER][self.FORMAT] = self.DEFAULT_LOGGER_FORMAT
         self[self.LOGGER][self.FORMAT] = str(self[self.LOGGER][self.FORMAT])
+
+        # input section
+        if self[self.INPUT][self.SOURCE] in ("", None):
+            self[self.INPUT][self.SOURCE] = []
+        if self[self.INPUT][self.DIR] in ("", None):
+            self[self.INPUT][self.DIR] = os.path.join(self[self.DIR], self.DEFAULT_INPUT_DIR)
+        if self[self.INPUT][self.IOSF] in ("", None):
+            self[self.INPUT][self.IOSF] = self[self.IOSF]
+        for key, value in self[self.LOGGER].items():
+            if key not in self[self.INPUT][self.LOGGER] or self[self.INPUT][self.LOGGER][key] in ("", None):
+                self[self.INPUT][self.LOGGER][key] = self[self.LOGGER][key]
+

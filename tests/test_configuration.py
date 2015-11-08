@@ -1,5 +1,6 @@
 import os
 import unittest
+from copy import deepcopy
 
 from gos.configuration import Configuration
 
@@ -170,6 +171,89 @@ class ConfigurationTestCase(unittest.TestCase):
         self.init_config.update_with_default_values()
         self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.FORMAT],
                          str(True))
+
+    def test_update_with_default_input_source_empty(self):
+        for empty_value in (None, ""):
+            self.init_config[self.init_config.INPUT][self.init_config.SOURCE] = empty_value
+            self.init_config.update_with_default_values()
+            self.assertListEqual(self.init_config[self.init_config.INPUT][self.init_config.SOURCE],
+                                 [])
+
+    def test_update_with_default_input_source_predefined(self):
+        for source_value in [["path1", "path2"], ["path3", "path4", "path5"]]:
+            self.init_config[self.init_config.INPUT][self.init_config.SOURCE] = source_value
+            self.init_config.update_with_default_values()
+            self.assertListEqual(source_value,
+                                 self.init_config[self.init_config.INPUT][self.init_config.SOURCE])
+
+    def test_update_with_default_input_dir_empty(self):
+        for empty_value in (None, ""):
+            self.init_config[self.init_config.INPUT][self.init_config.DIR] = empty_value
+            self.init_config.update_with_default_values()
+            self.assertEqual(self.init_config[self.init_config.INPUT][self.init_config.DIR],
+                             os.path.join(self.init_config[self.init_config.DIR],
+                                          self.init_config.DEFAULT_INPUT_DIR))
+
+    def test_update_with_default_input_io_silent_fail_empty(self):
+        for empty_value in (None, ""):
+            for top_level_iosf_value in (True, False):
+                self.init_config[self.init_config.INPUT][self.init_config.IOSF] = empty_value
+                self.init_config[self.init_config.IOSF] = top_level_iosf_value
+                self.init_config.update_with_default_values()
+                self.assertEqual(self.init_config[self.init_config.INPUT][self.init_config.IOSF],
+                                 top_level_iosf_value)
+
+    def get_list_of_logger_configurations(self):
+        return [{
+            self.init_config.NAME: "Logger Name 1",
+            self.init_config.LEVEL: "info 1",
+            self.init_config.FORMAT: "format 1",
+            self.init_config.DESTINATION: "destination 1"
+        }, {
+            self.init_config.NAME: "Logger Name 2",
+            self.init_config.LEVEL: "info 2",
+            self.init_config.FORMAT: "format 2",
+            self.init_config.DESTINATION: "destination 2"
+        }]
+
+    def tet_update_with_default_input_logger_empty(self):
+        for empty_value in (None, "", {}):
+            top_level_loggers = self.get_list_of_logger_configurations()
+            for logger_config in top_level_loggers:
+                self.init_config[self.init_config.INPUT][self.init_config.LOGGER] = empty_value
+                self.init_config[self.init_config.LOGGER] = logger_config
+                self.init_config.update_with_default_values()
+                self.assertDictEqual(self.init_config[self.init_config.INPUT][self.init_config.LOGGER],
+                                     logger_config)
+
+    def test_update_with_default_input_logger_partially_predefined(self):
+        partial_logger_configs = [
+            {self.init_config.NAME: "My name",
+             self.init_config.LEVEL: "My level"},
+            {self.init_config.LEVEL: "My level 2"},
+            {self.init_config.FORMAT: "My format",
+             self.init_config.DESTINATION: "My destination"}
+        ]
+        for partial_logger_config in partial_logger_configs:
+            for full_logger_config in self.get_list_of_logger_configurations():
+                self.init_config[self.init_config.INPUT][self.init_config.LOGGER] = deepcopy(partial_logger_config)
+                self.init_config[self.init_config.LOGGER] = full_logger_config
+                self.init_config.update_with_default_values()
+                for key, value in full_logger_config.items():
+                    if key not in partial_logger_config:
+                        self.assertEqual(full_logger_config[key],
+                                         self.init_config[self.init_config.INPUT][self.init_config.LOGGER][key])
+                    else:
+                        self.assertEqual(partial_logger_config[key],
+                                         self.init_config[self.init_config.INPUT][self.init_config.LOGGER][key])
+
+    def test_update_with_default_input_logger_specified(self):
+        for full_logger_spec in self.get_list_of_logger_configurations():
+            self.init_config[self.init_config.INPUT][self.init_config.LOGGER] = deepcopy(full_logger_spec)
+            self.init_config.update_with_default_values()
+            self.assertDictEqual(full_logger_spec,
+                                 self.init_config[self.init_config.INPUT][self.init_config.LOGGER])
+
 
 if __name__ == '__main__':
     unittest.main()
