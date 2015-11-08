@@ -128,4 +128,87 @@ class Configuration(dict):
             logger: output->logger                        #
             io_silent_fail: output->io_silent_fail        #
     """
-    pass
+
+    DIR = "dir"
+    LOGGER = "logger"
+    IOSF = "io_silent_fail"
+    INPUT = "input"
+    ALGORITHM = "algorithm"
+    OUTPUT = "output"
+    SOURCE = "source"
+    NAME = "name"
+    LEVEL = "level"
+    FORMAT = "format"
+    DESTINATION = "destination"
+    ASSEMBLY_POINTS = "assembly_points"
+    GENOMES = "genome"
+    STATS = "stats"
+    TASKS = "tasks"
+    STAGES = "stages"
+    ROUNDS = "rounds"
+    PIPELINE = "pipeline"
+    PATH = "path"
+    PATHS = "paths"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.DIR not in self:
+            self[self.DIR] = None
+        if self.IOSF not in self:
+            self[self.IOSF] = None
+        # logger section initialization
+        # values are reset in the default_setup method
+        if self.LOGGER not in self:
+            self[self.LOGGER] = {}
+        if self.NAME not in self[self.LOGGER]:
+            self[self.LOGGER][self.NAME] = None
+        if self.LEVEL not in self[self.LOGGER]:
+            self[self.LOGGER][self.LEVEL] = None
+        if self.FORMAT not in self[self.LOGGER]:
+            self[self.LOGGER][self.FORMAT] = None
+        if self.DESTINATION not in self[self.LOGGER]:
+            self[self.LOGGER][self.DESTINATION] = None
+        # input section initialization
+        # values are reset in the default_setup method
+        if self.INPUT not in self:
+            self[self.INPUT] = {}
+        if self.LOGGER not in self[self.INPUT]:
+            self[self.INPUT][self.LOGGER] = {}
+        if self.DIR not in self[self.INPUT]:
+            self[self.INPUT][self.DIR] = None
+        if self.IOSF not in self[self.INPUT]:
+            self[self.INPUT][self.IOSF] = None
+        if self.SOURCE not in self[self.INPUT]:
+            self[self.INPUT][self.SOURCE] = []
+        # algorithm section initialization
+        # values are reset in the default_setup method
+        if self.ALGORITHM not in self:
+            self[self.ALGORITHM] = {}
+        if self.LOGGER not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.LOGGER] = {}
+        if self.IOSF not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.IOSF] = False
+        if self.TASKS not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.TASKS] = []
+        if self.STAGES not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.STAGES] = []
+        if self.ROUNDS not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.ROUNDS] = []
+        if self.PIPELINE not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.PIPELINE] = {}
+        # output section initialization
+        # values are reset in the default_setup method
+        if self.OUTPUT not in self:
+            self[self.OUTPUT] = {}
+        if self.DIR not in self[self.OUTPUT]:
+            self[self.OUTPUT][self.DIR] = None
+        if self.LOGGER not in self[self.OUTPUT]:
+            self[self.OUTPUT][self.LOGGER] = {}
+        if self.IOSF not in self[self.OUTPUT]:
+            self[self.OUTPUT][self.IOSF] = None
+        if self.ASSEMBLY_POINTS not in self[self.OUTPUT]:
+            self[self.OUTPUT][self.ASSEMBLY_POINTS] = {}
+        if self.GENOMES not in self[self.OUTPUT]:
+            self[self.OUTPUT][self.GENOMES] = {}
+        if self.STATS not in self[self.OUTPUT]:
+            self[self.OUTPUT][self.STATS] = {}
