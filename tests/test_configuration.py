@@ -111,5 +111,65 @@ class ConfigurationTestCase(unittest.TestCase):
         self.init_config.update_with_default_values()
         self.assertEqual(self.init_config[self.init_config.IOSF], "CustomValue")
 
+    def test_update_with_default_logger_name_empty(self):
+        self.init_config[self.init_config.LOGGER][self.init_config.NAME] = ""
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.NAME],
+                         self.init_config.DEFAULT_LOGGER_NAME)
+        self.init_config[self.init_config.LOGGER][self.init_config.NAME] = None
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.NAME],
+                         self.init_config.DEFAULT_LOGGER_NAME)
+
+    def test_update_with_default_logger_name_predefined(self):
+        self.init_config[self.init_config.LOGGER][self.init_config.NAME] = True
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.NAME],
+                         str(True))
+        self.init_config[self.init_config.LOGGER][self.init_config.NAME] = "MyName"
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.NAME],
+                         "MyName")
+
+    def test_update_with_default_logger_level_empty(self):
+        self.init_config[self.init_config.LOGGER][self.init_config.LEVEL] = ""
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.LEVEL],
+                         self.init_config.DEFAULT_LOGGER_LEVEL)
+        self.init_config[self.init_config.LOGGER][self.init_config.LEVEL] = None
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.LEVEL],
+                         self.init_config.DEFAULT_LOGGER_LEVEL)
+
+    def test_update_with_default_logger_level_predefined(self):
+        self.init_config[self.init_config.LOGGER][self.init_config.LEVEL] = "MyLevel"
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.LEVEL],
+                         "MyLevel")
+        self.init_config[self.init_config.LOGGER][self.init_config.LEVEL] = True
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.LEVEL],
+                         str(True))
+
+    def test_update_with_default_logger_format_empty(self):
+        self.init_config[self.init_config.LOGGER][self.init_config.FORMAT] = ""
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.FORMAT],
+                         self.init_config.DEFAULT_LOGGER_FORMAT)
+        self.init_config[self.init_config.LOGGER][self.init_config.FORMAT] = None
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.FORMAT],
+                         self.init_config.DEFAULT_LOGGER_FORMAT)
+
+    def test_update_with_default_logger_format_predefined(self):
+        self.init_config[self.init_config.LOGGER][self.init_config.FORMAT] = "MyFormat"
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.FORMAT],
+                         "MyFormat")
+        self.init_config[self.init_config.LOGGER][self.init_config.FORMAT] = True
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.LOGGER][self.init_config.FORMAT],
+                         str(True))
+
 if __name__ == '__main__':
     unittest.main()

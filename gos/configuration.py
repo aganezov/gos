@@ -153,6 +153,9 @@ class Configuration(dict):
 
     # predefined constants
     DEFAULT_IOSF = False
+    DEFAULT_LOGGER_NAME = "GOSLogger"
+    DEFAULT_LOGGER_LEVEL = "info"
+    DEFAULT_LOGGER_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -224,6 +227,12 @@ class Configuration(dict):
             `dir` field is predefined with current working directory value, in case of empty string or `None`
             `io_silent_fail` field if predefined with :attr:`Configuration.DEFAULT_IOSF` in case of None or empty string
 
+        Logger section:
+            `name` field is predefined with :attr:`Configuration.DEFAULT_LOGGER_NAME`. Field is set to str() of itself
+            `level` field is predefined with :attr:`Configuration.DEFAULT_LOGGER_LEVEL`. Field is set to str() of itself
+            `format` field is predefined with :attr:`Configuration.DEFAULT_LOGGER_LEVEL`. Field is set to str() of itself
+            `destination` field if predefined with
+
         :return: Nothing, performs inplace changes
         :rtype: `None`
         """
@@ -231,3 +240,14 @@ class Configuration(dict):
             self[self.DIR] = os.getcwd()
         if self[self.IOSF] in ("", None):
             self[self.IOSF] = self.DEFAULT_IOSF
+
+        # logger section
+        if self[self.LOGGER][self.NAME] in ("", None):
+            self[self.LOGGER][self.NAME] = self.DEFAULT_LOGGER_NAME
+        self[self.LOGGER][self.NAME] = str(self[self.LOGGER][self.NAME])
+        if self[self.LOGGER][self.LEVEL] in ("", None):
+            self[self.LOGGER][self.LEVEL] = self.DEFAULT_LOGGER_LEVEL
+        self[self.LOGGER][self.LEVEL] = str(self[self.LOGGER][self.LEVEL])
+        if self[self.LOGGER][self.FORMAT] in ("", None):
+            self[self.LOGGER][self.FORMAT] = self.DEFAULT_LOGGER_FORMAT
+        self[self.LOGGER][self.FORMAT] = str(self[self.LOGGER][self.FORMAT])
