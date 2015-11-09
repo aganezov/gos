@@ -300,7 +300,7 @@ class Configuration(dict):
         if self[self.INPUT][self.SOURCE] in ("", None):
             self[self.INPUT][self.SOURCE] = []
         if self[self.INPUT][self.DIR] in ("", None):
-            self[self.INPUT][self.DIR] = os.path.join(self[self.DIR], self.DEFAULT_INPUT_DIR)
+            self[self.INPUT][self.DIR] = self.DEFAULT_INPUT_DIR
         if self[self.INPUT][self.IOSF] in ("", None):
             self[self.INPUT][self.IOSF] = self[self.IOSF]
         self._update_logger_config(logger_to_update=self[self.INPUT][self.LOGGER],

@@ -190,8 +190,7 @@ class ConfigurationTestCase(unittest.TestCase):
             self.init_config[self.init_config.INPUT][self.init_config.DIR] = empty_value
             self.init_config.update_with_default_values()
             self.assertEqual(self.init_config[self.init_config.INPUT][self.init_config.DIR],
-                             os.path.join(self.init_config[self.init_config.DIR],
-                                          self.init_config.DEFAULT_INPUT_DIR))
+                             self.init_config.DEFAULT_INPUT_DIR)
 
     def test_update_with_default_input_io_silent_fail_empty(self):
         for empty_value in (None, ""):
