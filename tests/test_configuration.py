@@ -1,7 +1,6 @@
 import os
 import unittest
 from copy import deepcopy
-
 from gos.configuration import Configuration
 
 
@@ -253,6 +252,211 @@ class ConfigurationTestCase(unittest.TestCase):
             self.init_config.update_with_default_values()
             self.assertDictEqual(full_logger_spec,
                                  self.init_config[self.init_config.INPUT][self.init_config.LOGGER])
+
+    def test_update_with_default_output_dir_empty(self):
+        for empty_value in (None, ""):
+            self.init_config[self.init_config.OUTPUT][self.init_config.DIR] = empty_value
+            self.init_config.update_with_default_values()
+            self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.DIR],
+                             os.path.join(self.init_config[self.init_config.DIR],
+                                          self.init_config.DEFAULT_OUTPUT_DIR))
+
+    def test_update_with_default_output_io_silent_fail_empty(self):
+        for empty_value in (None, ""):
+            for top_level_iosf_value in (True, False):
+                self.init_config[self.init_config.OUTPUT][self.init_config.IOSF] = empty_value
+                self.init_config[self.init_config.IOSF] = top_level_iosf_value
+                self.init_config.update_with_default_values()
+                self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.IOSF],
+                                 top_level_iosf_value)
+
+    def tet_update_with_default_output_logger_empty(self):
+        for empty_value in (None, "", {}):
+            top_level_loggers = self.get_list_of_logger_configurations()
+            for logger_config in top_level_loggers:
+                self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER] = empty_value
+                self.init_config[self.init_config.LOGGER] = logger_config
+                self.init_config.update_with_default_values()
+                self.assertDictEqual(self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER],
+                                     logger_config)
+
+    def test_update_with_default_output_logger_partially_predefined(self):
+        partial_logger_configs = [
+            {self.init_config.NAME: "My name",
+             self.init_config.LEVEL: "My level"},
+            {self.init_config.LEVEL: "My level 2"},
+            {self.init_config.FORMAT: "My format",
+             self.init_config.DESTINATION: "My destination"}
+        ]
+        for partial_logger_config in partial_logger_configs:
+            for full_logger_config in self.get_list_of_logger_configurations():
+                self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER] = deepcopy(partial_logger_config)
+                self.init_config[self.init_config.LOGGER] = full_logger_config
+                self.init_config.update_with_default_values()
+                for key, value in full_logger_config.items():
+                    if key not in partial_logger_config:
+                        self.assertEqual(full_logger_config[key],
+                                         self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER][key])
+                    else:
+                        self.assertEqual(partial_logger_config[key],
+                                         self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER][key])
+
+    def test_update_with_default_output_logger_specified(self):
+        for full_logger_spec in self.get_list_of_logger_configurations():
+            self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER] = deepcopy(full_logger_spec)
+            self.init_config.update_with_default_values()
+            self.assertDictEqual(full_logger_spec,
+                                 self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER])
+
+    def test_update_with_default_output_stats_empty(self):
+        for dir_name in ("output_dir1", "output_dir2", "output_dir3"):
+            for iosf_value in (True, False):
+                for logger_value in self.get_list_of_logger_configurations():
+                    self.init_config[self.init_config.OUTPUT][self.init_config.STATS] = {}
+                    self.init_config[self.init_config.OUTPUT][self.init_config.DIR] = dir_name
+                    self.init_config[self.init_config.OUTPUT][self.init_config.IOSF] = iosf_value
+                    self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER] = logger_value
+                    self.init_config.update_with_default_values()
+                    self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.STATS][self.init_config.FILE],
+                                     self.init_config.DEFAULT_OUTPUT_STATS_FILE)
+                    self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.STATS][self.init_config.DIR],
+                                     self.init_config.DEFAULT_OUTPUT_STATS_DIR)
+                    self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.STATS][self.init_config.IOSF],
+                                     iosf_value)
+                    self.assertDictEqual(self.init_config[self.init_config.OUTPUT][self.init_config.STATS][self.init_config.LOGGER],
+                                         logger_value)
+                    self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.STATS][self.init_config.FILE],
+                                     self.init_config.DEFAULT_OUTPUT_STATS_FILE)
+
+    def get_full_stats_configs(self):
+        return [
+            {self.init_config.DIR: "stat_dir_predefined_1",
+             self.init_config.FILE: "file_predefined_1.txt",
+             self.init_config.LOGGER: self.get_list_of_logger_configurations()[0],
+             self.init_config.IOSF: True},
+            {self.init_config.DIR: "stat_dir_predefined_2",
+             self.init_config.FILE: "file_predefined_2.txt",
+             self.init_config.LOGGER: self.get_list_of_logger_configurations()[0],
+             self.init_config.IOSF: False},
+        ]
+
+    def test_update_with_default_output_stats_partially_predefined(self):
+        partial_stats_configs = [
+            {self.init_config.DIR: "stats_dir",
+             self.init_config.FILE: "my_file_name.txt"},
+            {self.init_config.IOSF: True},
+            {self.init_config.DIR: "my_dir",
+             self.init_config.FILE: "my_file_name2.txt",
+             self.init_config.LOGGER: self.get_list_of_logger_configurations()[0]}
+        ]
+        for partial_stats_config in partial_stats_configs:
+            for full_stats_config in self.get_full_stats_configs():
+                self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER] = full_stats_config[self.init_config.LOGGER]
+                self.init_config[self.init_config.OUTPUT][self.init_config.STATS] = deepcopy(partial_stats_config)
+                self.init_config[self.init_config.OUTPUT][self.init_config.IOSF] = full_stats_config[self.init_config.IOSF]
+                self.init_config.update_with_default_values()
+                for key, value in partial_stats_config.items():
+                    self.assertEqual(partial_stats_config[key],
+                                     self.init_config[self.init_config.OUTPUT][self.init_config.STATS][key])
+
+    def test_update_with_default_output_stats_predefined(self):
+        for full_stats_config in self.get_full_stats_configs():
+            self.init_config[self.init_config.OUTPUT][self.init_config.STATS] = deepcopy(full_stats_config)
+            self.init_config.update_with_default_values()
+            self.assertDictEqual(self.init_config[self.init_config.OUTPUT][self.init_config.STATS],
+                                 full_stats_config)
+
+    def test_update_with_default_output_assembly_points_empty(self):
+        self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS] = {}
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.FILE],
+                         self.init_config.DEFAULT_OUTPUT_AP_FILE)
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.DIR],
+                         self.init_config.DEFAULT_OUTPUT_AP_DIR)
+        self.assertDictEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.LOGGER],
+                             self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER])
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.GENOME_SPECIFIC],
+                         self.init_config.DEFAULT_OUTPUT_AP_GENOME_SPECIFIC)
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.GENOME_SPECIFIC_FNP],
+                         self.init_config.DEFAULT_OUTPUT_AP_GSFNP)
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.IOSF],
+                         self.init_config[self.init_config.OUTPUT][self.init_config.IOSF])
+
+    def test_update_with_default_output_assembly_points_partially_predefined(self):
+        partial_ap_config = {
+            self.init_config.DIR: "my_ap_dir",
+            self.init_config.GENOME_SPECIFIC: True,
+            self.init_config.IOSF: False
+        }
+        self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS] = partial_ap_config
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.FILE],
+                         self.init_config.DEFAULT_OUTPUT_AP_FILE)
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.DIR],
+                         partial_ap_config[self.init_config.DIR])
+        self.assertDictEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.LOGGER],
+                             self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER])
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.GENOME_SPECIFIC],
+                         partial_ap_config[self.init_config.GENOME_SPECIFIC])
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.GENOME_SPECIFIC_FNP],
+                         self.init_config.DEFAULT_OUTPUT_AP_GSFNP)
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][self.init_config.IOSF],
+                         partial_ap_config[self.init_config.IOSF])
+
+    def test_update_with_default_output_assembly_points_predefined(self):
+        full_ap_config = {
+            self.init_config.FILE: "my_ap_file.txt",
+            self.init_config.DIR: "my_ap_dir",
+            self.init_config.IOSF: True,
+            self.init_config.GENOME_SPECIFIC: True,
+            self.init_config.GENOME_SPECIFIC_FNP: "my_patter_string_{genome_name}.txt",
+            self.init_config.LOGGER: self.get_list_of_logger_configurations()[0]
+        }
+        self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS] = full_ap_config
+        self.init_config.update_with_default_values()
+        for key, value in full_ap_config.items():
+            self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.ASSEMBLY_POINTS][key],
+                             full_ap_config[key])
+
+    def test_update_with_default_output_genomes_empty(self):
+        self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES] = {}
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES][self.init_config.DIR],
+                         self.init_config.DEFAULT_OUTPUT_GENOMES_DIR)
+        self.assertDictEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES][self.init_config.LOGGER],
+                             self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER])
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES][self.init_config.IOSF],
+                         self.init_config[self.init_config.OUTPUT][self.init_config.IOSF])
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES][self.init_config.OUTPUT_NG_FRAGMENTS],
+                         self.init_config.DEFAULT_OUTPUT_GENOMES_ONGF)
+
+    def test_update_with_default_output_genomes_partially_predefined(self):
+        partial_genomes_config = {
+            self.init_config.OUTPUT_NG_FRAGMENTS: True,
+            self.init_config.IOSF: False
+        }
+        self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES] = partial_genomes_config
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES][self.init_config.DIR],
+                         self.init_config.DEFAULT_OUTPUT_GENOMES_DIR)
+        self.assertDictEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES][self.init_config.LOGGER],
+                             self.init_config[self.init_config.OUTPUT][self.init_config.LOGGER])
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES][self.init_config.IOSF],
+                         partial_genomes_config[self.init_config.IOSF])
+        self.assertEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES][self.init_config.OUTPUT_NG_FRAGMENTS],
+                         partial_genomes_config[self.init_config.OUTPUT_NG_FRAGMENTS])
+
+    def test_update_with_default_output_genomes_predefined(self):
+        predefined_genome_config = {
+            self.init_config.OUTPUT_NG_FRAGMENTS: True,
+            self.init_config.IOSF: False,
+            self.init_config.LOGGER: self.get_list_of_logger_configurations()[0],
+            self.init_config.DIR: "my_genome_dir"
+        }
+        self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES] = predefined_genome_config
+        self.init_config.update_with_default_values()
+        self.assertDictEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES],
+                             predefined_genome_config)
 
 
 if __name__ == '__main__':

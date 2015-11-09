@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-from copy import deepcopy
 
 __author__ = "aganezov"
 __email__ = "aganezov(at)gwu.edu"
@@ -151,6 +150,10 @@ class Configuration(dict):
     PIPELINE = "pipeline"
     PATH = "path"
     PATHS = "paths"
+    FILE = "file"
+    GENOME_SPECIFIC = "genome_specific"
+    GENOME_SPECIFIC_FNP = "genome_specific_file_name_pattern"
+    OUTPUT_NG_FRAGMENTS = "output_non_glued_fragments"
 
     # predefined constants
     DEFAULT_IOSF = False
@@ -158,6 +161,15 @@ class Configuration(dict):
     DEFAULT_LOGGER_LEVEL = "info"
     DEFAULT_LOGGER_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     DEFAULT_INPUT_DIR = "input"
+    DEFAULT_OUTPUT_DIR = "output"
+    DEFAULT_OUTPUT_STATS_DIR = "stats"
+    DEFAULT_OUTPUT_STATS_FILE = "stats.txt"
+    DEFAULT_OUTPUT_AP_FILE = "assembly_points.txt"
+    DEFAULT_OUTPUT_AP_DIR = "assembly_points"
+    DEFAULT_OUTPUT_AP_GENOME_SPECIFIC = True
+    DEFAULT_OUTPUT_AP_GSFNP = "assembly_points_{genome_name}.txt"
+    DEFAULT_OUTPUT_GENOMES_ONGF = False
+    DEFAULT_OUTPUT_GENOMES_DIR = "genomes"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -241,6 +253,30 @@ class Configuration(dict):
             `io_silent_fail` if predefined with a top level `io_silent_fail`
             `logger` subsection if predefined by a top level `logger` section it substitutes all the missing values in `input` `logger` subsection
 
+        Output:
+            `dir` field is predefined with :attr:`Configuration.DEFAULT_OUTPUT_DIR`
+            `io_silent_fail` field is predefined with top level `io_silent_fail`
+            `logger` subsection is predefined with a top level logger section, which substitutes all of missing values from top level `logger` section
+            `stats` section
+                `io_silent_fail` field is predefined with `output->io_silent_fail` value
+                `dir` is predefined with :attr:`Configuration.DEFAULT_OUTPUT_STATS_DIR`
+                `file` is predefined with :attr:`Configuration.DEFAULT_OUTPUT_STATS_FILE`
+                `logger` is defaulted (all, or just missing parts) bu `output->logger` section
+
+            `assembly_points` section
+                `io_silent_fail` field is predefined with `output->io_silent_fail` value
+                `dir` is predefined with :attr:`Configuration.DEFAULT_OUTPUT_AP_DIR`
+                `file` is predefined with :attr:`Configuration.DEFAULT_OUTPUT_AP_FILE`
+                `logger` is defaulted (all, or just missing parts) bu `output->logger` section
+                `genome_specific` is predefined with :attr:`Configuration.DEFAULT_OUTPUT_AP_GENOME_SPECIFIC`
+                `genome_specific_file_name_pattern` is predefined with :attr:`Configuration.DEFAULT_OUTPUT_AP_GSFNP`
+
+            `genomes` section
+                `io_silent_fail` field is predefined with `output->io_silent_fail` value
+                `dir` is predefined with :attr:`Configuration.DEFAULT_OUTPUT_GENOMES_DIR`
+                `logger` is defaulted (all, or just missing parts) bu `output->logger` section
+                `output_non_glued_fragments` is predefined with :attr:`Configuration.DEFAULT_OUTPUT_GENOMES_ONGF`
+
         :return: Nothing, performs inplace changes
         :rtype: `None`
         """
@@ -267,7 +303,64 @@ class Configuration(dict):
             self[self.INPUT][self.DIR] = os.path.join(self[self.DIR], self.DEFAULT_INPUT_DIR)
         if self[self.INPUT][self.IOSF] in ("", None):
             self[self.INPUT][self.IOSF] = self[self.IOSF]
-        for key, value in self[self.LOGGER].items():
-            if key not in self[self.INPUT][self.LOGGER] or self[self.INPUT][self.LOGGER][key] in ("", None):
-                self[self.INPUT][self.LOGGER][key] = self[self.LOGGER][key]
+        self._update_logger_config(logger_to_update=self[self.INPUT][self.LOGGER],
+                                   source_logger=self[self.LOGGER])
+        # output section
+        if self[self.OUTPUT][self.DIR] in ("", None):
+            self[self.OUTPUT][self.DIR] = os.path.join(self[self.DIR], self.DEFAULT_OUTPUT_DIR)
+        if self[self.OUTPUT][self.IOSF] in ("", None):
+            self[self.OUTPUT][self.IOSF] = self[self.IOSF]
+        self._update_logger_config(logger_to_update=self[self.OUTPUT][self.LOGGER],
+                                   source_logger=self[self.LOGGER])
+
+        # output -> stats section
+        if self.DIR not in self[self.OUTPUT][self.STATS] or self[self.OUTPUT][self.STATS][self.DIR] in ("", None):
+            self[self.OUTPUT][self.STATS][self.DIR] = self.DEFAULT_OUTPUT_STATS_DIR
+        if self.IOSF not in self[self.OUTPUT][self.STATS] or self[self.OUTPUT][self.STATS][self.IOSF] in ("", None):
+            self[self.OUTPUT][self.STATS][self.IOSF] = self[self.OUTPUT][self.IOSF]
+        if self.FILE not in self[self.OUTPUT][self.STATS] or self[self.OUTPUT][self.STATS][self.FILE] in ("", None):
+            self[self.OUTPUT][self.STATS][self.FILE] = self.DEFAULT_OUTPUT_STATS_FILE
+        if self.LOGGER not in self[self.OUTPUT][self.STATS]:
+            self[self.OUTPUT][self.STATS][self.LOGGER] = {}
+        self._update_logger_config(logger_to_update=self[self.OUTPUT][self.STATS][self.LOGGER],
+                                   source_logger=self[self.OUTPUT][self.LOGGER])
+
+        # output -> assembly_points section
+        if self.DIR not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][self.DIR] in ("", None):
+            self[self.OUTPUT][self.ASSEMBLY_POINTS][self.DIR] = self.DEFAULT_OUTPUT_AP_DIR
+        if self.IOSF not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][self.IOSF] in ("", None):
+            self[self.OUTPUT][self.ASSEMBLY_POINTS][self.IOSF] = self[self.OUTPUT][self.IOSF]
+        if self.FILE not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][self.FILE] in ("", None):
+            self[self.OUTPUT][self.ASSEMBLY_POINTS][self.FILE] = self.DEFAULT_OUTPUT_AP_FILE
+        if self.GENOME_SPECIFIC not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][self.GENOME_SPECIFIC]:
+            self[self.OUTPUT][self.ASSEMBLY_POINTS][self.GENOME_SPECIFIC] = self.DEFAULT_OUTPUT_AP_GENOME_SPECIFIC
+        if self.GENOME_SPECIFIC_FNP not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][self.GENOME_SPECIFIC_FNP]:
+            self[self.OUTPUT][self.ASSEMBLY_POINTS][self.GENOME_SPECIFIC_FNP] = self.DEFAULT_OUTPUT_AP_GSFNP
+        if self.LOGGER not in self[self.OUTPUT][self.ASSEMBLY_POINTS]:
+            self[self.OUTPUT][self.ASSEMBLY_POINTS][self.LOGGER] = {}
+        self._update_logger_config(logger_to_update=self[self.OUTPUT][self.ASSEMBLY_POINTS][self.LOGGER],
+                                   source_logger=self[self.OUTPUT][self.LOGGER])
+
+        # output -> genomes section
+        if self.DIR not in self[self.OUTPUT][self.GENOMES] or self[self.OUTPUT][self.GENOMES][self.DIR] in ("", None):
+            self[self.OUTPUT][self.GENOMES][self.DIR] = self.DEFAULT_OUTPUT_GENOMES_DIR
+        if self.IOSF not in self[self.OUTPUT][self.GENOMES] or self[self.OUTPUT][self.GENOMES][self.IOSF] in ("", None):
+            self[self.OUTPUT][self.GENOMES][self.IOSF] = self[self.OUTPUT][self.IOSF]
+        if self.OUTPUT_NG_FRAGMENTS not in self[self.OUTPUT][self.GENOMES] or self[self.OUTPUT][self.GENOMES][self.OUTPUT_NG_FRAGMENTS] in ("", None):
+            self[self.OUTPUT][self.GENOMES][self.OUTPUT_NG_FRAGMENTS] = self.DEFAULT_OUTPUT_GENOMES_ONGF
+        if self.LOGGER not in self[self.OUTPUT][self.GENOMES]:
+            self[self.OUTPUT][self.GENOMES][self.LOGGER] = {}
+        self._update_logger_config(logger_to_update=self[self.OUTPUT][self.GENOMES][self.LOGGER],
+                                   source_logger=self[self.OUTPUT][self.LOGGER])
+
+
+    @staticmethod
+    def _update_logger_config(logger_to_update, source_logger):
+        if logger_to_update in ("", None):
+            logger_to_update = {}
+        for key, value in source_logger.items():
+            if key not in logger_to_update or logger_to_update[key] in ("", None):
+                logger_to_update[key] = source_logger[key]
+
+
 
