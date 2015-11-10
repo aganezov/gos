@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 
+import sys
+
 __author__ = "aganezov"
 __email__ = "aganezov(at)gwu.edu"
 __status__ = "development"
@@ -154,6 +156,7 @@ class Configuration(dict):
     GENOME_SPECIFIC = "genome_specific"
     GENOME_SPECIFIC_FNP = "genome_specific_file_name_pattern"
     OUTPUT_NG_FRAGMENTS = "output_non_glued_fragments"
+    SELF_LOOP = "self_loop"
 
     # predefined constants
     DEFAULT_IOSF = False
@@ -170,6 +173,11 @@ class Configuration(dict):
     DEFAULT_OUTPUT_AP_GSFNP = "assembly_points_{genome_name}.txt"
     DEFAULT_OUTPUT_GENOMES_ONGF = False
     DEFAULT_OUTPUT_GENOMES_DIR = "genomes"
+    DEFAULT_ALGORITHM_TASKS_PATH = "./tasks"
+    DEFAULT_ALGORITHM_PIPELINE_SELF_LOOP = True
+    DEFAULT_ALGORITHM_ROUND_SELF_LOOP = True
+    DEFAULT_ALGORITHM_STAGES_SELF_LOOP = True
+    DEFAULT_LOGGER_DESTINATION = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -208,9 +216,9 @@ class Configuration(dict):
         if self.LOGGER not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.LOGGER] = {}
         if self.IOSF not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.IOSF] = False
+            self[self.ALGORITHM][self.IOSF] = None
         if self.TASKS not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.TASKS] = []
+            self[self.ALGORITHM][self.TASKS] = {}
         if self.STAGES not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.STAGES] = []
         if self.ROUNDS not in self[self.ALGORITHM]:
@@ -253,7 +261,24 @@ class Configuration(dict):
             `io_silent_fail` if predefined with a top level `io_silent_fail`
             `logger` subsection if predefined by a top level `logger` section it substitutes all the missing values in `input` `logger` subsection
 
-        Output:
+        Algorithm section:
+            `io_silent_fail` is predefined with a top level `io_silent_fail` value
+            `logger` is predefined with top level `logger` configuration
+            `tasks` section:
+                `paths` is predefined by [:attr:`Configuration.DEFAULT_ALGORITHM_TASKS_PATH`]. If value is supplied,
+                        :attr:`Configuration.DEFAULT_ALGORITHM_TASKS_PATH` is prepended  to the supplied list
+            `stages` section: (is predefined with [])
+                if any values are predefined, such fields as `io_silent_fail`, `logger` are propagated to stages entries
+                `self_loop` value is predefined by :attr:`Configuration.DEFAULT_ALGORITHM_STAGES_SELF_LOOP`
+            `rounds` section: (is predefined with [])
+                if any values are predefined, such fields as `io_silent_fail`, `logger` are propagated to stages entries
+                `self_loop` value is predefined by :attr:`Configuration.DEFAULT_ALGORITHM_ROUNDS_SELF_LOOP`
+            `pipeline` section:
+                `self_loop` if predefined by :attr:`Configuration.DEFAULT_ALGORITHM_PIPELINE_SELF_LOOP`
+                `logger` if predefined with an algorithm->logger configuration. All non specified value are propagated respectively
+                `rounds` is predefined with []
+
+        Output section:
             `dir` field is predefined with :attr:`Configuration.DEFAULT_OUTPUT_DIR`
             `io_silent_fail` field is predefined with top level `io_silent_fail`
             `logger` subsection is predefined with a top level logger section, which substitutes all of missing values from top level `logger` section
@@ -295,6 +320,8 @@ class Configuration(dict):
         if self[self.LOGGER][self.FORMAT] in ("", None):
             self[self.LOGGER][self.FORMAT] = self.DEFAULT_LOGGER_FORMAT
         self[self.LOGGER][self.FORMAT] = str(self[self.LOGGER][self.FORMAT])
+        if self[self.LOGGER][self.DESTINATION] in ([], "", None):
+            self[self.LOGGER][self.DESTINATION] = self.DEFAULT_LOGGER_DESTINATION
 
         # input section
         if self[self.INPUT][self.SOURCE] in ("", None):
@@ -305,6 +332,50 @@ class Configuration(dict):
             self[self.INPUT][self.IOSF] = self[self.IOSF]
         self._update_logger_config(logger_to_update=self[self.INPUT][self.LOGGER],
                                    source_logger=self[self.LOGGER])
+
+        # algorithm section
+        if self.LOGGER not in self[self.ALGORITHM] or self[self.ALGORITHM][self.LOGGER] in ("", None):
+            self[self.ALGORITHM][self.LOGGER] = {}
+        self._update_logger_config(logger_to_update=self[self.ALGORITHM][self.LOGGER],
+                                   source_logger=self[self.LOGGER])
+        if self.IOSF not in self[self.ALGORITHM] or self[self.ALGORITHM][self.IOSF] in ("", None):
+            self[self.ALGORITHM][self.IOSF] = self[self.IOSF]
+        if self.TASKS not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.TASKS] = {}
+        if self.PATHS not in self[self.ALGORITHM][self.TASKS] or self[self.ALGORITHM][self.TASKS][self.PATHS] in ("", None):
+            self[self.ALGORITHM][self.TASKS][self.PATHS] = []
+        self[self.ALGORITHM][self.TASKS][self.PATHS] = [self.DEFAULT_ALGORITHM_TASKS_PATH] + self[self.ALGORITHM][self.TASKS][self.PATHS]
+        if self.STAGES not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.STAGES] = []
+        for stage in self[self.ALGORITHM][self.STAGES]:
+            if self.SELF_LOOP not in stage or stage[self.SELF_LOOP] in ("", None):
+                stage[self.SELF_LOOP] = self.DEFAULT_ALGORITHM_STAGES_SELF_LOOP
+            if self.LOGGER not in stage:
+                stage[self.LOGGER] = {}
+            self._update_logger_config(logger_to_update=stage[self.LOGGER],
+                                       source_logger=self[self.ALGORITHM][self.LOGGER])
+        if self.ROUNDS not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.ROUNDS] = []
+        for round in self[self.ALGORITHM][self.ROUNDS]:
+            if self.SELF_LOOP not in round or round[self.SELF_LOOP] in ("", None):
+                round[self.SELF_LOOP] = self.DEFAULT_ALGORITHM_ROUND_SELF_LOOP
+            if self.LOGGER not in round:
+                round[self.LOGGER] = {}
+            self._update_logger_config(logger_to_update=round[self.LOGGER],
+                                       source_logger=self[self.ALGORITHM][self.LOGGER])
+        if self.PIPELINE not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.PIPELINE] = {}
+        if self.LOGGER not in self[self.ALGORITHM][self.PIPELINE] or self[self.ALGORITHM][self.PIPELINE][self.LOGGER] in ("", None):
+            self[self.ALGORITHM][self.PIPELINE][self.LOGGER] = {}
+        self._update_logger_config(logger_to_update=self[self.ALGORITHM][self.PIPELINE][self.LOGGER],
+                                   source_logger=self[self.ALGORITHM][self.LOGGER])
+        if self.IOSF not in self[self.ALGORITHM][self.PIPELINE] or self[self.ALGORITHM][self.PIPELINE][self.IOSF] in ("", None):
+            self[self.ALGORITHM][self.PIPELINE][self.IOSF] = self[self.ALGORITHM][self.IOSF]
+        if self.ROUNDS not in self[self.ALGORITHM][self.PIPELINE] or self[self.ALGORITHM][self.PIPELINE][self.ROUNDS] in ("", None):
+            self[self.ALGORITHM][self.PIPELINE][self.ROUNDS] = []
+        if self.SELF_LOOP not in self[self.ALGORITHM][self.PIPELINE] or self[self.ALGORITHM][self.PIPELINE][self.SELF_LOOP] in ("", None):
+            self[self.ALGORITHM][self.PIPELINE][self.SELF_LOOP] = self.DEFAULT_ALGORITHM_PIPELINE_SELF_LOOP
+
         # output section
         if self[self.OUTPUT][self.DIR] in ("", None):
             self[self.OUTPUT][self.DIR] = os.path.join(self[self.DIR], self.DEFAULT_OUTPUT_DIR)
@@ -332,9 +403,11 @@ class Configuration(dict):
             self[self.OUTPUT][self.ASSEMBLY_POINTS][self.IOSF] = self[self.OUTPUT][self.IOSF]
         if self.FILE not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][self.FILE] in ("", None):
             self[self.OUTPUT][self.ASSEMBLY_POINTS][self.FILE] = self.DEFAULT_OUTPUT_AP_FILE
-        if self.GENOME_SPECIFIC not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][self.GENOME_SPECIFIC]:
+        if self.GENOME_SPECIFIC not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][
+            self.GENOME_SPECIFIC]:
             self[self.OUTPUT][self.ASSEMBLY_POINTS][self.GENOME_SPECIFIC] = self.DEFAULT_OUTPUT_AP_GENOME_SPECIFIC
-        if self.GENOME_SPECIFIC_FNP not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][self.GENOME_SPECIFIC_FNP]:
+        if self.GENOME_SPECIFIC_FNP not in self[self.OUTPUT][self.ASSEMBLY_POINTS] or self[self.OUTPUT][self.ASSEMBLY_POINTS][
+            self.GENOME_SPECIFIC_FNP]:
             self[self.OUTPUT][self.ASSEMBLY_POINTS][self.GENOME_SPECIFIC_FNP] = self.DEFAULT_OUTPUT_AP_GSFNP
         if self.LOGGER not in self[self.OUTPUT][self.ASSEMBLY_POINTS]:
             self[self.OUTPUT][self.ASSEMBLY_POINTS][self.LOGGER] = {}
@@ -346,13 +419,13 @@ class Configuration(dict):
             self[self.OUTPUT][self.GENOMES][self.DIR] = self.DEFAULT_OUTPUT_GENOMES_DIR
         if self.IOSF not in self[self.OUTPUT][self.GENOMES] or self[self.OUTPUT][self.GENOMES][self.IOSF] in ("", None):
             self[self.OUTPUT][self.GENOMES][self.IOSF] = self[self.OUTPUT][self.IOSF]
-        if self.OUTPUT_NG_FRAGMENTS not in self[self.OUTPUT][self.GENOMES] or self[self.OUTPUT][self.GENOMES][self.OUTPUT_NG_FRAGMENTS] in ("", None):
+        if self.OUTPUT_NG_FRAGMENTS not in self[self.OUTPUT][self.GENOMES] or self[self.OUTPUT][self.GENOMES][self.OUTPUT_NG_FRAGMENTS] in (
+        "", None):
             self[self.OUTPUT][self.GENOMES][self.OUTPUT_NG_FRAGMENTS] = self.DEFAULT_OUTPUT_GENOMES_ONGF
         if self.LOGGER not in self[self.OUTPUT][self.GENOMES]:
             self[self.OUTPUT][self.GENOMES][self.LOGGER] = {}
         self._update_logger_config(logger_to_update=self[self.OUTPUT][self.GENOMES][self.LOGGER],
                                    source_logger=self[self.OUTPUT][self.LOGGER])
-
 
     @staticmethod
     def _update_logger_config(logger_to_update, source_logger):
@@ -361,6 +434,3 @@ class Configuration(dict):
         for key, value in source_logger.items():
             if key not in logger_to_update or logger_to_update[key] in ("", None):
                 logger_to_update[key] = source_logger[key]
-
-
-

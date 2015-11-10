@@ -72,7 +72,7 @@ class ConfigurationTestCase(unittest.TestCase):
 
         self.assertIsInstance(algorithm_section[config.STAGES], list)
         self.assertIsInstance(algorithm_section[config.ROUNDS], list)
-        self.assertIsInstance(algorithm_section[config.TASKS], list)
+        self.assertIsInstance(algorithm_section[config.TASKS], dict)
         self.assertIsInstance(algorithm_section[config.PIPELINE], dict)
 
     def test_update_with_default_top_level_dir_empty(self):
@@ -456,6 +456,100 @@ class ConfigurationTestCase(unittest.TestCase):
         self.init_config.update_with_default_values()
         self.assertDictEqual(self.init_config[self.init_config.OUTPUT][self.init_config.GENOMES],
                              predefined_genome_config)
+
+    def test_update_with_default_algorithm_empty(self):
+        self.init_config[self.init_config.ALGORITHM] = {}
+        self.init_config.update_with_default_values()
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.LOGGER],
+                             self.init_config[self.init_config.LOGGER])
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.TASKS], {
+            self.init_config.PATHS: [self.init_config.DEFAULT_ALGORITHM_TASKS_PATH]})
+        self.assertEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.STAGES], [])
+        self.assertEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.ROUNDS], [])
+        expected_pipeline_config = {
+            self.init_config.LOGGER: self.init_config[self.init_config.ALGORITHM][self.init_config.LOGGER],
+            self.init_config.SELF_LOOP: self.init_config.DEFAULT_ALGORITHM_PIPELINE_SELF_LOOP,
+            self.init_config.ROUNDS: [],
+            self.init_config.IOSF: self.init_config[self.init_config.ALGORITHM][self.init_config.IOSF]
+        }
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.PIPELINE],
+                             expected_pipeline_config)
+
+    def test_update_with_default_algorithm_predefined_tasks_paths(self):
+        my_path_list = ["my_path1", "my_path2"]
+        self.init_config[self.init_config.ALGORITHM] = {
+            self.init_config.TASKS: {
+                self.init_config.PATHS: deepcopy(my_path_list)
+            }
+        }
+        self.init_config.update_with_default_values()
+        self.assertIn(self.init_config.DEFAULT_ALGORITHM_TASKS_PATH,
+                      self.init_config[self.init_config.ALGORITHM][self.init_config.TASKS][self.init_config.PATHS])
+        for my_path in my_path_list:
+            self.assertIn(my_path,
+                          self.init_config[self.init_config.ALGORITHM][self.init_config.TASKS][self.init_config.PATHS])
+
+    def test_update_with_default_algorithm_logger_for_stages(self):
+        self.init_config[self.init_config.ALGORITHM] = {
+            self.init_config.STAGES: [{
+                self.init_config.NAME: "my_stage_name",
+            }]
+        }
+        self.init_config.update_with_default_values()
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.STAGES][0][self.init_config.LOGGER],
+                             self.init_config[self.init_config.ALGORITHM][self.init_config.LOGGER])
+
+    def test_update_with_default_algorithm_logger_for_rounds(self):
+        self.init_config[self.init_config.ALGORITHM] = {
+            self.init_config.ROUNDS: [{
+                self.init_config.NAME: "my_round_name",
+            }]
+        }
+        self.init_config.update_with_default_values()
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.ROUNDS][0][self.init_config.LOGGER],
+                             self.init_config[self.init_config.ALGORITHM][self.init_config.LOGGER])
+
+    def test_update_with_default_algorithm_pipeline_logger(self):
+        self.init_config[self.init_config.ALGORITHM] = {
+            self.init_config.PIPELINE: {
+                self.init_config.ROUNDS: []
+            }
+        }
+        self.init_config.update_with_default_values()
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.PIPELINE][self.init_config.LOGGER],
+                             self.init_config[self.init_config.ALGORITHM][self.init_config.LOGGER])
+
+    def test_update_with_default_algorithm_predefined(self):
+        predefined_algorithm_config = {
+            self.init_config.IOSF: False,
+            self.init_config.LOGGER: self.get_list_of_logger_configurations()[0],
+            self.init_config.TASKS: {
+                self.init_config.PATHS: ["my_path_1", "my_path_2"]
+            },
+            self.init_config.STAGES: {},
+            self.init_config.ROUNDS: {},
+            self.init_config.PIPELINE: {
+                self.init_config.LOGGER: self.get_list_of_logger_configurations()[1],
+                self.init_config.SELF_LOOP: False,
+                self.init_config.ROUNDS: ["round1", "round2"]
+            }
+        }
+        self.init_config[self.init_config.ALGORITHM] = deepcopy(predefined_algorithm_config)
+        self.init_config.update_with_default_values()
+        self.assertEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.IOSF],
+                         predefined_algorithm_config[self.init_config.IOSF])
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.LOGGER],
+                             predefined_algorithm_config[self.init_config.LOGGER])
+        self.assertListEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.TASKS][self.init_config.PATHS],
+                             [self.init_config.DEFAULT_ALGORITHM_TASKS_PATH] +
+                             predefined_algorithm_config[self.init_config.TASKS][self.init_config.PATHS])
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.STAGES],
+                             predefined_algorithm_config[self.init_config.STAGES])
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.ROUNDS],
+                             predefined_algorithm_config[self.init_config.ROUNDS])
+        predefined_algorithm_config[self.init_config.PIPELINE][self.init_config.IOSF] = self.init_config[self.init_config.ALGORITHM][self.init_config.IOSF]
+        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.PIPELINE],
+                             predefined_algorithm_config[self.init_config.PIPELINE])
 
 
 if __name__ == '__main__':
