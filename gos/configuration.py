@@ -181,52 +181,13 @@ class Configuration(dict):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.DIR not in self:
-            self[self.DIR] = None
-        if self.IOSF not in self:
-            self[self.IOSF] = None
-        # logger section initialization
-        # values are reset in the default_setup method
-        if self.LOGGER not in self:
-            self[self.LOGGER] = {}
-        if self.NAME not in self[self.LOGGER]:
-            self[self.LOGGER][self.NAME] = None
-        if self.LEVEL not in self[self.LOGGER]:
-            self[self.LOGGER][self.LEVEL] = None
-        if self.FORMAT not in self[self.LOGGER]:
-            self[self.LOGGER][self.FORMAT] = None
-        if self.DESTINATION not in self[self.LOGGER]:
-            self[self.LOGGER][self.DESTINATION] = None
-        # input section initialization
-        # values are reset in the default_setup method
-        if self.INPUT not in self:
-            self[self.INPUT] = {}
-        if self.LOGGER not in self[self.INPUT]:
-            self[self.INPUT][self.LOGGER] = {}
-        if self.DIR not in self[self.INPUT]:
-            self[self.INPUT][self.DIR] = None
-        if self.IOSF not in self[self.INPUT]:
-            self[self.INPUT][self.IOSF] = None
-        if self.SOURCE not in self[self.INPUT]:
-            self[self.INPUT][self.SOURCE] = []
-        # algorithm section initialization
-        # values are reset in the default_setup method
-        if self.ALGORITHM not in self:
-            self[self.ALGORITHM] = {}
-        if self.LOGGER not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.LOGGER] = {}
-        if self.IOSF not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.IOSF] = None
-        if self.TASKS not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.TASKS] = {}
-        if self.STAGES not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.STAGES] = []
-        if self.ROUNDS not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.ROUNDS] = []
-        if self.PIPELINE not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.PIPELINE] = {}
-        # output section initialization
-        # values are reset in the default_setup method
+        self._init_top_level_fields()
+        self._init_logger_top_level_section()
+        self._init_input_section()
+        self._init_algorithm_section()
+        self._init_output_section()
+
+    def _init_output_section(self):
         if self.OUTPUT not in self:
             self[self.OUTPUT] = {}
         if self.DIR not in self[self.OUTPUT]:
@@ -241,6 +202,52 @@ class Configuration(dict):
             self[self.OUTPUT][self.GENOMES] = {}
         if self.STATS not in self[self.OUTPUT]:
             self[self.OUTPUT][self.STATS] = {}
+
+    def _init_algorithm_section(self):
+        if self.ALGORITHM not in self:
+            self[self.ALGORITHM] = {}
+        if self.LOGGER not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.LOGGER] = {}
+        if self.IOSF not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.IOSF] = None
+        if self.TASKS not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.TASKS] = {}
+        if self.STAGES not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.STAGES] = []
+        if self.ROUNDS not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.ROUNDS] = []
+        if self.PIPELINE not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.PIPELINE] = {}
+
+    def _init_input_section(self):
+        if self.INPUT not in self:
+            self[self.INPUT] = {}
+        if self.LOGGER not in self[self.INPUT]:
+            self[self.INPUT][self.LOGGER] = {}
+        if self.DIR not in self[self.INPUT]:
+            self[self.INPUT][self.DIR] = None
+        if self.IOSF not in self[self.INPUT]:
+            self[self.INPUT][self.IOSF] = None
+        if self.SOURCE not in self[self.INPUT]:
+            self[self.INPUT][self.SOURCE] = []
+
+    def _init_logger_top_level_section(self):
+        if self.LOGGER not in self:
+            self[self.LOGGER] = {}
+        if self.NAME not in self[self.LOGGER]:
+            self[self.LOGGER][self.NAME] = None
+        if self.LEVEL not in self[self.LOGGER]:
+            self[self.LOGGER][self.LEVEL] = None
+        if self.FORMAT not in self[self.LOGGER]:
+            self[self.LOGGER][self.FORMAT] = None
+        if self.DESTINATION not in self[self.LOGGER]:
+            self[self.LOGGER][self.DESTINATION] = None
+
+    def _init_top_level_fields(self):
+        if self.DIR not in self:
+            self[self.DIR] = None
+        if self.IOSF not in self:
+            self[self.IOSF] = None
 
     def update_with_default_values(self):
         """ Goes through all the configuration fields and predefines empty ones with default values
