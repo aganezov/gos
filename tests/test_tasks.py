@@ -94,7 +94,7 @@ class TaskLoaderTestCase(unittest.TestCase):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
         return tmp_file
 
-    def test_load_task_from_multiple_custom_tasks_classes(self):
+    def test_load_from_file_multiple_custom_tasks_classes(self):
         source_file = self.create_tmp_py_file()
         source_file.write(self.get_base_task_import_code_string())
         for custom_task_code_string in self.get_custom_task_files_values():
