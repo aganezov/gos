@@ -142,5 +142,24 @@ class TaskLoaderTestCase(unittest.TestCase):
         self.assertDictEqual(result, {})
         tmp_dir.cleanup()
 
+    def test_load_from_dir_multiple_python_files(self):
+        tmp_dir = tempfile.TemporaryDirectory()
+        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_file1.write(self.get_base_task_import_code_string())
+        tmp_file2.write(self.get_base_task_import_code_string())
+        for tasks_class_strings in self.get_custom_task_files_values()[:1]:
+            tmp_file1.write(tasks_class_strings)
+        tmp_file1.flush()
+        for tasks_class_strings in self.get_custom_task_files_values()[1:]:
+            tmp_file2.write(tasks_class_strings)
+        tmp_file2.flush()
+        importlib.invalidate_caches()
+        result = TaskLoader().load_tasks_from_dir(tmp_dir.name)
+        for task_name in ["my_task_one", "my_task_two", "my_task_three"]:
+            self.assertIn(task_name, result)
+            self.assertTrue(issubclass(result[task_name], BaseTask))
+        tmp_dir.cleanup()
+
 if __name__ == '__main__':
     unittest.main()
