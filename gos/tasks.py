@@ -73,6 +73,13 @@ class TaskLoader(object):
         return result
 
     def load_tasks(self, paths):
+        """ Loads all subclasses of BaseTask from modules that are contained in supplied directory paths or direct module paths
+
+        :param paths: an iterable of fully qualified paths to python modules / directories, from where we import subclasses of BaseClass
+        :type paths: `iterable`(`str`)
+        :return: a dict of CustomTasks, where key is CustomTask.name, and value is a CustomClass task itself
+        :rtype: `dict`
+        """
         try:
             result = {}
             for path in paths:
@@ -85,6 +92,6 @@ class TaskLoader(object):
                     continue
             return result
         except TypeError:
-            raise GOSTaskException()
+            raise GOSTaskException("Argument for `load_tasks` method must be iterable")
 
 
