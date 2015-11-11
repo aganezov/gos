@@ -44,4 +44,6 @@ class TaskLoader(object):
 
     def load_tasks_from_dir(self, dir_path):
         if not os.path.exists(dir_path):
-            raise GOSTaskException
+            raise GOSTaskException()
+        if os.path.isfile(dir_path):
+            raise GOSTaskException()

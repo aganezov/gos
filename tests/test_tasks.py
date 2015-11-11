@@ -111,6 +111,10 @@ class TaskLoaderTestCase(unittest.TestCase):
         with self.assertRaises(GOSTaskException):
             TaskLoader().load_tasks_from_dir(non_existing_dir)
 
+    def test_load_from_dir_file_supplied(self):
+        tmp_file = tempfile.NamedTemporaryFile(mode="wt")
+        with self.assertRaises(GOSTaskException):
+            TaskLoader().load_tasks_from_dir(tmp_file.name)
 
 if __name__ == '__main__':
     unittest.main()
