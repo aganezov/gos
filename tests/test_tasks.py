@@ -66,7 +66,11 @@ class TaskLoaderTestCase(unittest.TestCase):
         return [
             """class MyTaskOne(BaseTask):\n\tname = "my_task_one"\n\tdef run(self, assembler_manager):\n\t\tpass\n""",
             """class MyTaskTwo(BaseTask):\n\tname = "my_task_two"\n\tdef run(self, assembler_manager):\n\t\tpass\n""",
-            """class MyTaskThree(BaseTask):\n\tname = "my_task_three"\n\tdef run(self, assembler_manager):\n\t\tpass\n"""
+            """class MyTaskThree(BaseTask):\n\tname = "my_task_three"\n\tdef run(self, assembler_manager):\n\t\tpass\n""",
+            """class MyTaskFour(BaseTask):\n\tname = "my_task_four"\n\tdef run(self, assembler_manager):\n\t\tpass\n""",
+            """class MyTaskFive(BaseTask):\n\tname = "my_task_five"\n\tdef run(self, assembler_manager):\n\t\tpass\n""",
+            """class MyTaskSix(BaseTask):\n\tname = "my_task_six"\n\tdef run(self, assembler_manager):\n\t\tpass\n""",
+            """class MyTaskSeven(BaseTask):\n\tname = "my_task_seven"\n\tdef run(self, assembler_manager):\n\t\tpass\n""",
         ]
 
     def get_custom_non_task_classes_code_strings(self):
@@ -160,6 +164,88 @@ class TaskLoaderTestCase(unittest.TestCase):
             self.assertIn(task_name, result)
             self.assertTrue(issubclass(result[task_name], BaseTask))
         tmp_dir.cleanup()
+
+    def test_load_tasks_non_iterable_argument(self):
+        with self.assertRaises(GOSTaskException):
+            TaskLoader().load_tasks(5)
+
+    def test_load_tasks_only_python_files(self):
+        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file1.write(self.get_base_task_import_code_string())
+        tmp_file2.write(self.get_base_task_import_code_string())
+        for tasks_class_strings in self.get_custom_task_files_values()[:1]:
+            tmp_file1.write(tasks_class_strings)
+        tmp_file1.flush()
+        for tasks_class_strings in self.get_custom_task_files_values()[1:]:
+            tmp_file2.write(tasks_class_strings)
+        tmp_file2.flush()
+        importlib.invalidate_caches()
+        paths = [tmp_file1.name, tmp_file2.name]
+        result = TaskLoader().load_tasks(paths=paths)
+        for task_name in ["my_task_one", "my_task_two", "my_task_three"]:
+            self.assertIn(task_name, result)
+            self.assertTrue(issubclass(result[task_name], BaseTask))
+
+    def test_load_tasks_non_string_value_in_paths(self):
+        paths = ["path1", "path2", BaseTask(), "path3"]
+        with self.assertRaises(GOSTaskException):
+            TaskLoader().load_tasks(paths=paths)
+
+    def test_load_tasks_only_files_some_files_are_non_python(self):
+        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file3 = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
+        tmp_file1.write(self.get_base_task_import_code_string())
+        tmp_file2.write(self.get_base_task_import_code_string())
+        tmp_file3.write(self.get_base_task_import_code_string())
+        for tasks_class_strings in self.get_custom_task_files_values()[:1]:
+            tmp_file1.write(tasks_class_strings)
+        tmp_file1.flush()
+        for tasks_class_strings in self.get_custom_task_files_values()[1:2]:
+            tmp_file2.write(tasks_class_strings)
+        tmp_file2.flush()
+        for tasks_class_strings in self.get_custom_task_files_values()[2:]:
+            tmp_file3.write(tasks_class_strings)
+        tmp_file3.flush()
+        importlib.invalidate_caches()
+        paths = [tmp_file1.name, tmp_file2.name, tmp_file3.name]
+        result = TaskLoader().load_tasks(paths=paths)
+        for task_name in ["my_task_one", "my_task_two"]:
+            self.assertIn(task_name, result)
+            self.assertTrue(issubclass(result[task_name], BaseTask))
+        self.assertNotIn("my_task_three", result)
+
+    def test_load_tasks_files_and_dirs(self):
+        tmp_dir1 = tempfile.TemporaryDirectory()
+        tmp_dir2 = tempfile.TemporaryDirectory()
+
+        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir1.name, delete=False)
+        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir1.name, delete=False)
+        tmp_file3 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir1.name, delete=False)
+
+        tmp_file4 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir2.name, delete=False)
+        tmp_file5 = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py", dir=tmp_dir2.name, delete=False)
+
+        tmp_file6 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file7 = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
+
+        tmp_files = [tmp_file1, tmp_file2, tmp_file3, tmp_file4, tmp_file5, tmp_file6, tmp_file7]
+
+        for cnt, tmp_file in enumerate(tmp_files):
+            tmp_file.write(self.get_base_task_import_code_string())
+            tmp_file.write(self.get_custom_task_files_values()[cnt])
+            tmp_file.flush()
+        importlib.invalidate_caches()
+        paths = [tmp_dir1.name, tmp_dir2.name, tmp_file6.name, tmp_file7.name]
+        result = TaskLoader().load_tasks(paths=paths)
+        for task_name in ["my_task_one", "my_task_two", "my_task_three", "my_task_four", "my_task_six"]:
+            self.assertIn(task_name, result)
+            self.assertTrue(issubclass(result[task_name], BaseTask))
+        self.assertNotIn("my_task_five", result)
+        self.assertNotIn("my_task_seven", result)
+        tmp_dir1.cleanup()
+        tmp_dir2.cleanup()
 
 if __name__ == '__main__':
     unittest.main()

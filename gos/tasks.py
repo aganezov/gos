@@ -72,3 +72,19 @@ class TaskLoader(object):
                 continue
         return result
 
+    def load_tasks(self, paths):
+        try:
+            result = {}
+            for path in paths:
+                try:
+                    if os.path.isdir(path):
+                        result.update(self.load_tasks_from_dir(path))
+                    elif os.path.isfile(path):
+                        result.update(self.load_tasks_from_file(path))
+                except GOSTaskException:
+                    continue
+            return result
+        except TypeError:
+            raise GOSTaskException()
+
+
