@@ -41,3 +41,7 @@ class TaskLoader(object):
             except TypeError:
                 continue
         return result
+
+    def load_tasks_from_dir(self, dir_path):
+        if not os.path.exists(dir_path):
+            raise GOSTaskException

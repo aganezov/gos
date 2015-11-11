@@ -106,6 +106,11 @@ class TaskLoaderTestCase(unittest.TestCase):
         self.assertNotIn("my_non_base_task", result)
         source_file.close()
 
+    def test_load_from_dir_dir_does_not_exists(self):
+        non_existing_dir = "/my_non/existing_dir"
+        with self.assertRaises(GOSTaskException):
+            TaskLoader().load_tasks_from_dir(non_existing_dir)
+
 
 if __name__ == '__main__':
     unittest.main()
