@@ -19,16 +19,23 @@ class BaseTask(object):
 class TaskLoader(object):
 
     def load_tasks_from_file(self, file_path):
+        """ Imports specified python module and returns subclasses of BaseTask from it
+
+        :param file_path: a fully qualified file path for a python module to import CustomTasks from
+        :type param: `str`
+        :return: a dict of CustomTasks, where key is CustomTask.name, and value is a CustomClass task itself
+        :rtype: `dict`
+        """
         if not os.path.exists(file_path):
-            raise GOSTaskException()
+            raise GOSTaskException("Specified file to load custom tasks from does not exists")
         if os.path.isdir(file_path):
-            raise GOSTaskException()
-        module_path, name = os.path.split(file_path)
-        if not name.endswith((".py", ".pyc")):
-            raise GOSTaskException()
+            raise GOSTaskException("Specified path for file to load custom tasks from corresponds to a directory, not a file")
+        module_path, file_name = os.path.split(file_path)
+        if not file_name.endswith((".py", ".pyc")):
+            raise GOSTaskException("Specified path for file to load custom tasks from does not correspond to python file ")
         if module_path not in sys.path:
             sys.path.insert(0, module_path)
-        module_name = name[:name.rfind(".")]
+        module_name = file_name[:file_name.rfind(".")]
         module = importlib.import_module(module_name)
         objects = [getattr(module, attr_name) for attr_name in dir(module)]
         result = {}
@@ -36,13 +43,22 @@ class TaskLoader(object):
             try:
                 if issubclass(entry, BaseTask):
                     if entry.__name__ != BaseTask.__name__ and entry.name == BaseTask.name:
-                        raise GOSTaskException()
+                        raise GOSTaskException("Class {class_name} form file {file_name} does not have a unique `name` class field. "
+                                               "All custom tasks must have a unique `name` class field for them, tat is used for future reference"
+                                               "".format(class_name=entry.name, file_name=os.path.join(module_path, file_name)))
                     result[entry.name] = entry
             except TypeError:
                 continue
         return result
 
     def load_tasks_from_dir(self, dir_path):
+        """ Imports all python modules in specified directories and returns subclasses of BaseTask from them
+
+        :param dir_path: fully qualified directory path, where all python modules will be search for subclasses of BaseTask
+        :type dir_path: `str`
+        :return: a dict of CustomTasks, where key is CustomTask.name, and value is a CustomClass task itself
+        :rtype: `dict`
+        """
         if not os.path.exists(dir_path):
             raise GOSTaskException()
         if os.path.isfile(dir_path):
