@@ -116,5 +116,31 @@ class TaskLoaderTestCase(unittest.TestCase):
         with self.assertRaises(GOSTaskException):
             TaskLoader().load_tasks_from_dir(tmp_file.name)
 
+    def test_load_from_dir_single_file_with_multiple_classes(self):
+        tmp_dir = tempfile.TemporaryDirectory()
+        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_file1.write(self.get_base_task_import_code_string())
+        for task_class_string in self.get_custom_task_files_values():
+            tmp_file1.write(task_class_string)
+        tmp_file1.flush()
+        importlib.invalidate_caches()
+        result = TaskLoader().load_tasks_from_dir(tmp_dir.name)
+        for task_name in ["my_task_one", "my_task_two", "my_task_three"]:
+            self.assertIn(task_name, result)
+            self.assertTrue(issubclass(result[task_name], BaseTask))
+        tmp_dir.cleanup()
+
+    def test_load_from_dir_non_python_file(self):
+        tmp_dir = tempfile.TemporaryDirectory()
+        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py", dir=tmp_dir.name, delete=False)
+        tmp_file1.write(self.get_base_task_import_code_string())
+        for task_class_string in self.get_custom_task_files_values():
+            tmp_file1.write(task_class_string)
+        tmp_file1.flush()
+        importlib.invalidate_caches()
+        result = TaskLoader().load_tasks_from_dir(tmp_dir.name)
+        self.assertDictEqual(result, {})
+        tmp_dir.cleanup()
+
 if __name__ == '__main__':
     unittest.main()
