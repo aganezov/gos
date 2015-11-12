@@ -61,6 +61,18 @@ class ExecutableContainerTestCase(unittest.TestCase):
         with self.assertRaises(GOSExecutableContainerException):
             ExecutableContainer.setup_from_file(non_py_file.name)
 
+    def test_setup_from_file_no_unique_name(self):
+        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file.write(self.get_executable_container_import_string())
+        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tdef setup():\n\t\tpass""")
+        tmp_file.flush()
+        importlib.invalidate_caches()
+        with self.assertRaises(GOSExecutableContainerException):
+            ExecutableContainer.setup_from_file(tmp_file.name)
+
+    def get_executable_container_import_string(self):
+        return """from gos.executable_containers import ExecutableContainer\n"""
+
     def test_setup_from_file_no_setup_method(self):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file.write(self.get_executable_container_import_string())
