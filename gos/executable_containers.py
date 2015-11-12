@@ -10,9 +10,10 @@ class ExecutableContainer(object):
     name = "executable_container"
 
     DEFAULT_SELF_LOOP = False
+    DEFAULT_ENTRIES_TYPE_NAME = None
 
     def __init__(self, name=None, self_loop=DEFAULT_SELF_LOOP, do_self_loop=False, entries_names=None, entries=None,
-                 logger=None):
+                 entries_type_name=DEFAULT_ENTRIES_TYPE_NAME, logger=None):
         if name is None:
             name = self.__class__.name
         self.name = name
@@ -24,6 +25,7 @@ class ExecutableContainer(object):
         if entries is None:
             entries = []
         self.entries = entries
+        self.entries_type_name = entries_type_name
         self.logger = logger
 
     def run(self, assembler_manager):
