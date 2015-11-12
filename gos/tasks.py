@@ -93,5 +93,3 @@ class TaskLoader(object):
             return result
         except TypeError:
             raise GOSTaskException("Argument for `load_tasks` method must be iterable")
-
-
