@@ -57,13 +57,13 @@ class ExecutableContainer(object):
         result = {}
         for entry in objects:
             try:
-                if issubclass(entry, ExecutableContainer):
-                    if entry.__name__ != ExecutableContainer.__name__ and entry.name == ExecutableContainer.name:
+                if issubclass(entry, ExecutableContainer) and entry.__name__ != ExecutableContainer.__name__:
+                    if entry.name == ExecutableContainer.name:
                         raise GOSExecutableContainerException(
                             "Class {class_name} form file {file_name} does not have a unique `name` class field. "
                             "All custom tasks must have a unique `name` class field for them, tat is used for future reference"
                             "".format(class_name=entry.name, file_name=os.path.join(module_path, file_name)))
-                    if not hasattr(entry, "setup"):
+                    elif not hasattr(entry, "setup"):
                         raise GOSExecutableContainerException()
                     result[entry.name] = entry
             except TypeError:

@@ -64,7 +64,7 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_setup_from_file_no_setup_method(self):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file.write(self.get_executable_container_import_string())
-        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tpass""")
+        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tname="new_executable_container_name" """)
         tmp_file.flush()
         importlib.invalidate_caches()
         with self.assertRaises(GOSExecutableContainerException):
