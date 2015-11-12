@@ -36,5 +36,10 @@ class ExecutableContainerTestCase(unittest.TestCase):
         with self.assertRaises(GOSExecutableContainerException):
             ExecutableContainer.setup_from_config(config={})
 
+    def test_setup_from_config_self_loop_value(self):
+        ec = ExecutableContainer.setup_from_config({"name": "my_name",
+                                                    "self_loop": False})
+        self.assertFalse(ec.self_loop)
+
 if __name__ == '__main__':
     unittest.main()

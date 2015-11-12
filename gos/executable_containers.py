@@ -5,7 +5,9 @@ from gos.exceptions import GOSExecutableContainerException
 class ExecutableContainer(object):
     name = "executable_container"
 
-    def __init__(self, name=None, self_loop=False, do_self_loop=False, entries_info=None, entries=None,
+    DEFAULT_SELF_LOOP=False
+
+    def __init__(self, name=None, self_loop=DEFAULT_SELF_LOOP, do_self_loop=False, entries_info=None, entries=None,
                  logger=None):
         if name is None:
             name = self.__class__.name
@@ -30,3 +32,5 @@ class ExecutableContainer(object):
             result.name = config["name"]
         except KeyError:
             raise GOSExecutableContainerException()
+        result.self_loop = config.get("self_loop", ExecutableContainer.DEFAULT_SELF_LOOP)
+        return result
