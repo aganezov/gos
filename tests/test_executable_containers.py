@@ -14,7 +14,7 @@ class ExecutableContainerTestCase(unittest.TestCase):
         self.assertTrue(hasattr(self.ec, "name"))
 
     def test_entries_info_attribute(self):
-        self.assertTrue(hasattr(self.ec, "entries_info"))
+        self.assertTrue(hasattr(self.ec, "entries_names"))
 
     def test_entries_attribute(self):
         self.assertTrue(hasattr(self.ec, "entries"))
@@ -40,6 +40,14 @@ class ExecutableContainerTestCase(unittest.TestCase):
         ec = ExecutableContainer.setup_from_config({"name": "my_name",
                                                     "self_loop": False})
         self.assertFalse(ec.self_loop)
+
+    def test_setup_from_config_entries_names(self):
+        stage_name_list = ["stage1", "stage2", "stage3"]
+        ec = ExecutableContainer.setup_from_config({"name": "my_name",
+                                                    "stages": stage_name_list},
+                                                   entries_names_list_reference="stages")
+        self.assertListEqual(ec.entries_names, stage_name_list)
+
 
 if __name__ == '__main__':
     unittest.main()
