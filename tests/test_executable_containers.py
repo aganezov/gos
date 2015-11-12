@@ -28,5 +28,7 @@ class ExecutableContainerTestCase(unittest.TestCase):
         self.assertTrue(hasattr(self.ec, "run"))
         self.assertTrue(callable(getattr(self.ec, "run")))
 
+    def test_logger_attribute(self):
+        self.assertTrue(hasattr(self.ec, "logger"))
 if __name__ == '__main__':
     unittest.main()
