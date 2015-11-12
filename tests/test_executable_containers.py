@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import importlib
+
+import tempfile
 import unittest
 
 from gos.exceptions import GOSExecutableContainerException
@@ -47,6 +50,28 @@ class ExecutableContainerTestCase(unittest.TestCase):
                                                     "stages": stage_name_list},
                                                    entries_names_list_reference="stages")
         self.assertListEqual(ec.entries_names, stage_name_list)
+
+    def test_setup_from_file_file_does_not_exists(self):
+        non_existing_path = "non_existing_path.py"
+        with self.assertRaises(GOSExecutableContainerException):
+            ExecutableContainer.setup_from_file(non_existing_path)
+
+    def test_setup_from_file_non_python_file(self):
+        non_py_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
+        with self.assertRaises(GOSExecutableContainerException):
+            ExecutableContainer.setup_from_file(non_py_file.name)
+
+    def test_setup_from_file_no_setup_method(self):
+        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file.write(self.get_executable_container_import_string())
+        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tpass""")
+        tmp_file.flush()
+        importlib.invalidate_caches()
+        with self.assertRaises(GOSExecutableContainerException):
+            ExecutableContainer.setup_from_file(tmp_file.name)
+
+    def get_executable_container_import_string(self):
+        return """from gos.executable_containers import ExecutableContainer\n"""
 
 
 if __name__ == '__main__':

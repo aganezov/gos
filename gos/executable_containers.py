@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import importlib
+import sys
+
+import os
 from gos.exceptions import GOSExecutableContainerException
 
 
@@ -34,4 +38,34 @@ class ExecutableContainer(object):
             raise GOSExecutableContainerException()
         result.self_loop = config.get("self_loop", ExecutableContainer.DEFAULT_SELF_LOOP)
         result.entries_names = config.get(entries_names_list_reference, [])
+        return result
+
+    @staticmethod
+    def setup_from_file(file_path):
+        if not os.path.exists(file_path):
+            raise GOSExecutableContainerException()
+        if os.path.isdir(file_path):
+            raise GOSExecutableContainerException()
+        module_path, file_name = os.path.split(file_path)
+        if not file_name.endswith((".py", ".pyc")):
+            raise GOSExecutableContainerException()
+        if module_path not in sys.path:
+            sys.path.insert(0, module_path)
+        module_name = file_name[:file_name.rfind(".")]
+        module = importlib.import_module(module_name)
+        objects = [getattr(module, attr_name) for attr_name in dir(module)]
+        result = {}
+        for entry in objects:
+            try:
+                if issubclass(entry, ExecutableContainer):
+                    if entry.__name__ != ExecutableContainer.__name__ and entry.name == ExecutableContainer.name:
+                        raise GOSExecutableContainerException(
+                            "Class {class_name} form file {file_name} does not have a unique `name` class field. "
+                            "All custom tasks must have a unique `name` class field for them, tat is used for future reference"
+                            "".format(class_name=entry.name, file_name=os.path.join(module_path, file_name)))
+                    if not hasattr(entry, "setup"):
+                        raise GOSExecutableContainerException()
+                    result[entry.name] = entry
+            except TypeError:
+                continue
         return result
