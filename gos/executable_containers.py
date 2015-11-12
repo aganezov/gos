@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from gos.exceptions import GOSExecutableContainerException
 
 
 class ExecutableContainer(object):
@@ -21,3 +22,11 @@ class ExecutableContainer(object):
 
     def run(self, assembler_manager):
         pass
+
+    @staticmethod
+    def setup_from_config(config):
+        result = ExecutableContainer()
+        try:
+            result.name = config["name"]
+        except KeyError:
+            raise GOSExecutableContainerException()

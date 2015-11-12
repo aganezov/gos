@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+from gos.exceptions import GOSExecutableContainerException
 from gos.executable_containers import ExecutableContainer
 
 
@@ -30,5 +31,10 @@ class ExecutableContainerTestCase(unittest.TestCase):
 
     def test_logger_attribute(self):
         self.assertTrue(hasattr(self.ec, "logger"))
+
+    def test_setup_from_config_no_name(self):
+        with self.assertRaises(GOSExecutableContainerException):
+            ExecutableContainer.setup_from_config(config={})
+
 if __name__ == '__main__':
     unittest.main()
