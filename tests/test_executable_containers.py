@@ -57,12 +57,12 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_setup_from_file_file_does_not_exists(self):
         non_existing_path = "non_existing_path.py"
         with self.assertRaises(GOSExecutableContainerException):
-            ExecutableContainer.setup_from_file(non_existing_path)
+            ExecutableContainer.setup_from_file(non_existing_path, "executable_container")
 
     def test_setup_from_file_non_python_file(self):
         non_py_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
         with self.assertRaises(GOSExecutableContainerException):
-            ExecutableContainer.setup_from_file(non_py_file.name)
+            ExecutableContainer.setup_from_file(non_py_file.name, "executable_container")
 
     def test_setup_from_file_no_unique_name(self):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
@@ -71,7 +71,7 @@ class ExecutableContainerTestCase(unittest.TestCase):
         tmp_file.flush()
         importlib.invalidate_caches()
         with self.assertRaises(GOSExecutableContainerException):
-            ExecutableContainer.setup_from_file(tmp_file.name)
+            ExecutableContainer.setup_from_file(tmp_file.name, "executable_container")
 
     def get_executable_container_import_string(self):
         return """from gos.executable_containers import ExecutableContainer\n"""
@@ -83,7 +83,16 @@ class ExecutableContainerTestCase(unittest.TestCase):
         tmp_file.flush()
         importlib.invalidate_caches()
         with self.assertRaises(GOSExecutableContainerException):
-            ExecutableContainer.setup_from_file(tmp_file.name)
+            ExecutableContainer.setup_from_file(tmp_file.name, "executable_container")
+
+    def test_setup_from_file_no_match_by_name_attribute(self):
+        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file.write(self.get_executable_container_import_string())
+        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tname="new_ec_name"\n\tdef setup():\n\t\tpass""")
+        tmp_file.flush()
+        importlib.invalidate_caches()
+        with self.assertRaises(GOSExecutableContainerException):
+            ExecutableContainer.setup_from_file(tmp_file.name, container_name="not_new_ec_name")
 
 
 if __name__ == '__main__':

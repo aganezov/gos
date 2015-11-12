@@ -43,7 +43,7 @@ class ExecutableContainer(object):
         return result
 
     @staticmethod
-    def setup_from_file(file_path):
+    def setup_from_file(file_path, container_name):
         if not os.path.exists(file_path):
             raise GOSExecutableContainerException()
         if os.path.isdir(file_path):
@@ -56,7 +56,6 @@ class ExecutableContainer(object):
         module_name = file_name[:file_name.rfind(".")]
         module = importlib.import_module(module_name)
         objects = [getattr(module, attr_name) for attr_name in dir(module)]
-        result = {}
         for entry in objects:
             try:
                 if issubclass(entry, ExecutableContainer) and entry.__name__ != ExecutableContainer.__name__:
@@ -67,7 +66,8 @@ class ExecutableContainer(object):
                             "".format(class_name=entry.name, file_name=os.path.join(module_path, file_name)))
                     elif not hasattr(entry, "setup"):
                         raise GOSExecutableContainerException()
-                    result[entry.name] = entry
+                    if entry.name == container_name:
+                        return entry.setup()
             except TypeError:
                 continue
-        return result
+        raise GOSExecutableContainerException()
