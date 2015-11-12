@@ -5,7 +5,7 @@ class ExecutableContainer(object):
     name = "executable_container"
 
     def __init__(self, name=None, self_loop=False, do_self_loop=False, entries_info=None, entries=None,
-                 logger=False):
+                 logger=None):
         if name is None:
             name = self.__class__.name
         self.name = name
@@ -17,7 +17,7 @@ class ExecutableContainer(object):
         if entries is None:
             entries = []
         self.entries = entries
-        self.logger=None
+        self.logger = logger
 
     def run(self, assembler_manager):
         pass
