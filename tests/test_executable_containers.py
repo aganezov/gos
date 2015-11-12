@@ -82,9 +82,6 @@ class ExecutableContainerTestCase(unittest.TestCase):
         with self.assertRaises(GOSExecutableContainerException):
             ExecutableContainer.setup_from_file(tmp_file.name)
 
-    def get_executable_container_import_string(self):
-        return """from gos.executable_containers import ExecutableContainer\n"""
-
 
 if __name__ == '__main__':
     unittest.main()
