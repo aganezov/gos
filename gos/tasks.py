@@ -22,7 +22,7 @@ class TaskLoader(object):
         """ Imports specified python module and returns subclasses of BaseTask from it
 
         :param file_path: a fully qualified file path for a python module to import CustomTasks from
-        :type param: `str`
+        :type file_path: `str`
         :return: a dict of CustomTasks, where key is CustomTask.name, and value is a CustomClass task itself
         :rtype: `dict`
         """
