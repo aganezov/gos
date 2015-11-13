@@ -4,6 +4,7 @@ import tempfile
 import unittest
 
 from gos.exceptions import GOSExecutableContainerException, GOSIOException
+from gos.algo.stages.base_stage import Stage
 from gos.executable_containers import ExecutableContainer
 
 
@@ -104,6 +105,11 @@ class ExecutableContainerTestCase(unittest.TestCase):
         self.assertIsInstance(result, ExecutableContainer)
         self.assertListEqual(result.entries_names, ["entry1"])
         self.assertEqual(result.entries_type_name, "task")
+
+
+class BaseStageTestCase(unittest.TestCase):
+    def test_base_stage_executable_container_entries_type_name_attribute(self):
+        self.assertEqual(Stage.entries_type_name, "task")
 
 
 if __name__ == '__main__':
