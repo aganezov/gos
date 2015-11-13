@@ -67,7 +67,9 @@ class ExecutableContainer(object):
                     elif not hasattr(entry, "setup"):
                         raise GOSExecutableContainerException()
                     if entry.name == container_name:
-                        return entry.setup()
+                        result = entry()
+                        result.setup()
+                        return result
             except TypeError:
                 continue
         raise GOSExecutableContainerException()

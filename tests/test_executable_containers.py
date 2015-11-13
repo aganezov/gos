@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import importlib
-
 import tempfile
 import unittest
 
@@ -67,7 +66,7 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_setup_from_file_no_unique_name(self):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file.write(self.get_executable_container_import_string())
-        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tdef setup():\n\t\tpass""")
+        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tdef setup(self):\n\t\tpass""")
         tmp_file.flush()
         importlib.invalidate_caches()
         with self.assertRaises(GOSExecutableContainerException):
@@ -88,11 +87,23 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_setup_from_file_no_match_by_name_attribute(self):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file.write(self.get_executable_container_import_string())
-        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tname="new_ec_name"\n\tdef setup():\n\t\tpass""")
+        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tname="new_ec_name"\n\tdef setup(self):\n\t\tpass""")
         tmp_file.flush()
         importlib.invalidate_caches()
         with self.assertRaises(GOSExecutableContainerException):
             ExecutableContainer.setup_from_file(tmp_file.name, container_name="not_new_ec_name")
+
+    def test_setup_from_file(self):
+        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file.write(self.get_executable_container_import_string())
+        tmp_file.write(
+            """class MyContainer(ExecutableContainer):\n\tname="my_ec"\n\tdef setup(self):\n\t\tself.entries_names = ["entry1"]\n\t\tself.entries_type_name="task" """)
+        tmp_file.flush()
+        importlib.invalidate_caches()
+        result = ExecutableContainer.setup_from_file(tmp_file.name, container_name="my_ec")
+        self.assertIsInstance(result, ExecutableContainer)
+        self.assertListEqual(result.entries_names, ["entry1"])
+        self.assertEqual(result.entries_type_name, "task")
 
 
 if __name__ == '__main__':
