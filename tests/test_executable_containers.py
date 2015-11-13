@@ -3,6 +3,7 @@ import importlib
 import tempfile
 import unittest
 
+from gos.algo.rounds.base_round import Round
 from gos.exceptions import GOSExecutableContainerException, GOSIOException
 from gos.algo.stages.base_stage import Stage
 from gos.executable_containers import ExecutableContainer
@@ -110,6 +111,11 @@ class ExecutableContainerTestCase(unittest.TestCase):
 class BaseStageTestCase(unittest.TestCase):
     def test_base_stage_executable_container_entries_type_name_attribute(self):
         self.assertEqual(Stage.entries_type_name, "task")
+
+
+class BaseRoundTestCase(unittest.TestCase):
+    def test_base_stage_executable_container_entries_type_name_attribute(self):
+        self.assertEqual(Round.entries_type_name, "stage")
 
 
 if __name__ == '__main__':
