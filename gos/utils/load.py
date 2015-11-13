@@ -4,7 +4,7 @@ import os
 
 import sys
 
-from gos.exceptions import GOSTaskException, GOSIOException
+from gos.exceptions import GOSIOException
 
 
 class Loader(object):
