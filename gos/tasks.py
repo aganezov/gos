@@ -5,7 +5,7 @@ import importlib
 
 import os
 from gos.exceptions import GOSTaskException, GOSIOException
-from gos.utils.loader import Loader
+from gos.utils.load import Loader
 
 
 class BaseTask(object):

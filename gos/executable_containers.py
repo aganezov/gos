@@ -4,7 +4,7 @@ import sys
 
 import os
 from gos.exceptions import GOSExecutableContainerException
-from gos.utils.loader import Loader
+from gos.utils.load import Loader
 
 
 class ExecutableContainer(object):
