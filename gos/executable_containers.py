@@ -4,6 +4,7 @@ import sys
 
 import os
 from gos.exceptions import GOSExecutableContainerException
+from gos.utils.loader import Loader
 
 
 class ExecutableContainer(object):
@@ -44,18 +45,7 @@ class ExecutableContainer(object):
 
     @staticmethod
     def setup_from_file(file_path, container_name):
-        if not os.path.exists(file_path):
-            raise GOSExecutableContainerException()
-        if os.path.isdir(file_path):
-            raise GOSExecutableContainerException()
-        module_path, file_name = os.path.split(file_path)
-        if not file_name.endswith((".py", ".pyc")):
-            raise GOSExecutableContainerException()
-        if module_path not in sys.path:
-            sys.path.insert(0, module_path)
-        module_name = file_name[:file_name.rfind(".")]
-        module = importlib.import_module(module_name)
-        objects = [getattr(module, attr_name) for attr_name in dir(module)]
+        file_name, module_path, objects = Loader.import_custom_python_file(file_path)
         for entry in objects:
             try:
                 if issubclass(entry, ExecutableContainer) and entry.__name__ != ExecutableContainer.__name__:

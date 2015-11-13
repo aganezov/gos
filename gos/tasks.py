@@ -4,7 +4,8 @@ import sys
 import importlib
 
 import os
-from gos.exceptions import GOSTaskException
+from gos.exceptions import GOSTaskException, GOSIOException
+from gos.utils.loader import Loader
 
 
 class BaseTask(object):
@@ -26,18 +27,7 @@ class TaskLoader(object):
         :return: a dict of CustomTasks, where key is CustomTask.name, and value is a CustomClass task itself
         :rtype: `dict`
         """
-        if not os.path.exists(file_path):
-            raise GOSTaskException("Specified file to load custom tasks from does not exists")
-        if os.path.isdir(file_path):
-            raise GOSTaskException("Specified path for file to load custom tasks from corresponds to a directory, not a file")
-        module_path, file_name = os.path.split(file_path)
-        if not file_name.endswith((".py", ".pyc")):
-            raise GOSTaskException("Specified path for file to load custom tasks from does not correspond to python file ")
-        if module_path not in sys.path:
-            sys.path.insert(0, module_path)
-        module_name = file_name[:file_name.rfind(".")]
-        module = importlib.import_module(module_name)
-        objects = [getattr(module, attr_name) for attr_name in dir(module)]
+        file_name, module_path, objects = Loader.import_custom_python_file(file_path)
         result = {}
         for entry in objects:
             try:
@@ -70,6 +60,8 @@ class TaskLoader(object):
                 result.update(self.load_tasks_from_file(full_file_path))
             except GOSTaskException:
                 continue
+            except GOSIOException:
+                continue
         return result
 
     def load_tasks(self, paths):
@@ -89,6 +81,8 @@ class TaskLoader(object):
                     elif os.path.isfile(path):
                         result.update(self.load_tasks_from_file(path))
                 except GOSTaskException:
+                    continue
+                except GOSIOException:
                     continue
             return result
         except TypeError:

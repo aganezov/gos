@@ -3,7 +3,7 @@ import importlib
 import tempfile
 import unittest
 
-from gos.exceptions import GOSExecutableContainerException
+from gos.exceptions import GOSExecutableContainerException, GOSIOException
 from gos.executable_containers import ExecutableContainer
 
 
@@ -55,12 +55,12 @@ class ExecutableContainerTestCase(unittest.TestCase):
 
     def test_setup_from_file_file_does_not_exists(self):
         non_existing_path = "non_existing_path.py"
-        with self.assertRaises(GOSExecutableContainerException):
+        with self.assertRaises(GOSIOException):
             ExecutableContainer.setup_from_file(non_existing_path, "executable_container")
 
     def test_setup_from_file_non_python_file(self):
         non_py_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
-        with self.assertRaises(GOSExecutableContainerException):
+        with self.assertRaises(GOSIOException):
             ExecutableContainer.setup_from_file(non_py_file.name, "executable_container")
 
     def test_setup_from_file_no_unique_name(self):

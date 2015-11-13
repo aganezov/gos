@@ -4,7 +4,7 @@ import os
 import tempfile
 import unittest
 
-from gos.exceptions import GOSTaskException
+from gos.exceptions import GOSTaskException, GOSIOException
 from gos.tasks import BaseTask, TaskLoader
 
 
@@ -33,12 +33,12 @@ class BaseTaskTestCase(unittest.TestCase):
 class TaskLoaderTestCase(unittest.TestCase):
     def test_load_from_file_file_does_not_exists(self):
         file_path = "non_existing_file_pass"
-        with self.assertRaises(GOSTaskException):
+        with self.assertRaises(GOSIOException):
             TaskLoader().load_tasks_from_file(file_path)
 
     def test_load_from_file_dir_supplied(self):
         dir_path = os.path.dirname(__file__)
-        with self.assertRaises(GOSTaskException):
+        with self.assertRaises(GOSIOException):
             TaskLoader().load_tasks_from_file(dir_path)
 
     def test_load_from_file_no_name_attribute_on_loaded_class(self):
@@ -56,7 +56,7 @@ class TaskLoaderTestCase(unittest.TestCase):
     def test_load_from_file_non_python_file(self):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
         importlib.invalidate_caches()
-        with self.assertRaises(GOSTaskException):
+        with self.assertRaises(GOSIOException):
             TaskLoader().load_tasks_from_file(tmp_file.name)
 
     def get_base_task_import_code_string(self):

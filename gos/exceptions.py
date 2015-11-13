@@ -7,3 +7,7 @@ class GOSTaskException(Exception):
 
 class GOSExecutableContainerException(Exception):
     pass
+
+
+class GOSIOException(Exception):
+    pass
