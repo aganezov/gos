@@ -21,6 +21,9 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_entries_type_name_attribute(self):
         self.assertTrue(hasattr(self.ec, "entries_type_name"))
 
+    def test_type_name_attribute(self):
+        self.assertTrue(hasattr(self.ec, "type_name"))
+
     def test_entries_info_attribute(self):
         self.assertTrue(hasattr(self.ec, "entries_names"))
 
