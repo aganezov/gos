@@ -132,6 +132,9 @@ class PipelineTestCase(unittest.TestCase):
     def test_pipeline_executable_container_entries_type_name_attribute(self):
         self.assertEqual(Pipeline.entries_type_name, "round")
 
+    def test_pipeline_executable_container_type_name(self):
+        self.assertEqual(Pipeline.type_name, "pipeline")
+
 
 if __name__ == '__main__':
     unittest.main()
