@@ -124,6 +124,9 @@ class BaseRoundTestCase(unittest.TestCase):
     def test_base_round_executable_container_entries_type_name_attribute(self):
         self.assertEqual(Round.entries_type_name, "stage")
 
+    def test_base_round_executable_container_type_name(self):
+        self.assertEqual(Round.type_name, "round")
+
 
 class PipelineTestCase(unittest.TestCase):
     def test_pipeline_executable_container_entries_type_name_attribute(self):
