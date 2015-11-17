@@ -116,6 +116,9 @@ class BaseStageTestCase(unittest.TestCase):
     def test_base_stage_executable_container_entries_type_name_attribute(self):
         self.assertEqual(Stage.entries_type_name, "task")
 
+    def test_base_stage_executable_container_type_name(self):
+        self.assertEqual(Stage.type_name, "stage")
+
 
 class BaseRoundTestCase(unittest.TestCase):
     def test_base_round_executable_container_entries_type_name_attribute(self):
