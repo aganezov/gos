@@ -62,6 +62,16 @@ class TaskLoaderTestCase(unittest.TestCase):
     def get_base_task_import_code_string(self):
         return "from gos.tasks import BaseTask\n"
 
+    @staticmethod
+    def get_tasks_names():
+        return ["my_task_one",
+                "my_task_two",
+                "my_task_three",
+                "my_task_four",
+                "my_task_five",
+                "my_task_six",
+                "my_task_seven"]
+
     def get_custom_task_files_values(self):
         return [
             """class MyTaskOne(BaseTask):\n\tname = "my_task_one"\n\tdef run(self, assembler_manager):\n\t\tpass\n""",
