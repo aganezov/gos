@@ -95,11 +95,11 @@ class AssemblyManagerTestCase(unittest.TestCase):
     def test_manager_get_task(self):
         task = self._get_my_task_instance()
         self.am.tasks_instances[task.name] = task
-        self.assertEqual(self.am.get_task(task.name), task)
+        self.assertEqual(self.am.get_task_instance(task.name), task)
 
     def test_manager_get_task_name_does_not_exist(self):
         with self.assertRaises(GOSCriticalException):
-            self.am.get_task("non_existing_name")
+            self.am.get_task_instance("non_existing_name")
 
     def _get_my_task_class(self):
         class MyTask(BaseTask):

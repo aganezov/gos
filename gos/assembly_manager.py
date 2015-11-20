@@ -26,7 +26,7 @@ class AssemblyManager(object):
                     raise GOSTaskException("An exception happened during the task instantiation."
                                            "{exception}".format(exception=ex))
 
-    def get_task(self, task_name):
+    def get_task_instance(self, task_name):
         try:
             return self.tasks_instances[task_name]
         except KeyError:
