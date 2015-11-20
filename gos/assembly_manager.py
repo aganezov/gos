@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from gos.configuration import Configuration
-from gos.exceptions import GOSTaskException
+from gos.exceptions import GOSTaskException, GOSCriticalException
 from gos.tasks import TaskLoader
 
 
@@ -25,3 +25,6 @@ class AssemblyManager(object):
                 if not self.configuration[Configuration.ALGORITHM][Configuration.IOSF]:
                     raise GOSTaskException("An exception happened during the task instantiation."
                                            "{exception}".format(exception=ex))
+
+    def get_task(self, task_name):
+        return self.tasks_instances[task_name]

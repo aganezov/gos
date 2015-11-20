@@ -92,6 +92,23 @@ class AssemblyManagerTestCase(unittest.TestCase):
                 pass
         return ErrorTask
 
+    def test_manager_get_task(self):
+        task = self._get_my_task_instance()
+        self.am.tasks_instances[task.name] = task
+        self.assertEqual(self.am.get_task(task.name), task)
+
+    def _get_my_task_class(self):
+        class MyTask(BaseTask):
+            name = "my_task"
+
+            def run(self, assembler_manager):
+                pass
+
+        return MyTask
+
+    def _get_my_task_instance(self):
+        return self._get_my_task_class()()
+
 
 if __name__ == '__main__':
     unittest.main()
