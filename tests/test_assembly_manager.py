@@ -6,7 +6,7 @@ import unittest
 
 from gos.assembly_manager import AssemblyManager
 from gos.configuration import Configuration
-from gos.exceptions import GOSTaskException
+from gos.exceptions import GOSTaskException, GOSCriticalException
 from gos.tasks import BaseTask, TaskLoader
 from tests.test_tasks import TaskLoaderTestCase
 
@@ -96,6 +96,10 @@ class AssemblyManagerTestCase(unittest.TestCase):
         task = self._get_my_task_instance()
         self.am.tasks_instances[task.name] = task
         self.assertEqual(self.am.get_task(task.name), task)
+
+    def test_manager_get_task_name_does_not_exist(self):
+        with self.assertRaises(GOSCriticalException):
+            self.am.get_task("non_existing_name")
 
     def _get_my_task_class(self):
         class MyTask(BaseTask):

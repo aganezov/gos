@@ -11,3 +11,7 @@ class GOSExecutableContainerException(Exception):
 
 class GOSIOException(Exception):
     pass
+
+
+class GOSCriticalException(Exception):
+    pass

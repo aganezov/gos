@@ -27,4 +27,8 @@ class AssemblyManager(object):
                                            "{exception}".format(exception=ex))
 
     def get_task(self, task_name):
-        return self.tasks_instances[task_name]
+        try:
+            return self.tasks_instances[task_name]
+        except KeyError:
+            raise GOSCriticalException("Attempted to retrieve a task by name={task_name} which instance was not created"
+                                       "".format(task_name=task_name))
