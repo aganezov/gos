@@ -59,6 +59,11 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertIsInstance(output_section[config.ASSEMBLY_POINTS], dict)
         self.assertIsInstance(output_section[config.GENOMES], dict)
 
+    def test_initialization_algorithm_section_executable_containers(self):
+        config = Configuration()
+        algorithm_section = config[config.ALGORITHM]
+        self.assertIn(config.EXECUTABLE_CONTAINERS, algorithm_section)
+
     def test_initialization_algorithm_section(self):
         """ algorithm section configuration for GOS workflow """
         config = Configuration()
@@ -66,12 +71,8 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertIn(config.IOSF, algorithm_section)
         self.assertIn(config.LOGGER, algorithm_section)
         self.assertIn(config.TASKS, algorithm_section)
-        self.assertIn(config.STAGES, algorithm_section)
-        self.assertIn(config.ROUNDS, algorithm_section)
         self.assertIn(config.PIPELINE, algorithm_section)
 
-        self.assertIsInstance(algorithm_section[config.STAGES], list)
-        self.assertIsInstance(algorithm_section[config.ROUNDS], list)
         self.assertIsInstance(algorithm_section[config.TASKS], dict)
         self.assertIsInstance(algorithm_section[config.PIPELINE], dict)
 

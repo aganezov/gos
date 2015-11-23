@@ -58,9 +58,19 @@ class Configuration(dict):
         logger: .->logger                                 # --
         tasks:                                            # -- single processing entity specification
             paths: []                                     # -- unchangeable value is "./tasks". everything else specified will be appended
+
                                                           #    to "./tasks" directory. All *.py files are observed and all classes,
                                                           #    being subclasses of GOSTask will be processed and available for further usage
                                                           #################################################################################
+        executable_containers:
+            - name: stage
+              reference: stages
+              entry_type_name: task
+
+            - name: round
+              reference: rounds
+              entry_type_name: stage
+
         stages:                                           # -- section describing next level layer of processing entities "stages"
             - name: stage1                                # -- unique name of a stages, that it can be referenced by later.
               self_loop: false                            # -- flag determining if a stage must be executed again, after its first execution
@@ -157,6 +167,7 @@ class Configuration(dict):
     GENOME_SPECIFIC_FNP = "genome_specific_file_name_pattern"
     OUTPUT_NG_FRAGMENTS = "output_non_glued_fragments"
     SELF_LOOP = "self_loop"
+    EXECUTABLE_CONTAINERS = "executable_containers"
 
     # predefined constants
     DEFAULT_IOSF = False
@@ -210,12 +221,10 @@ class Configuration(dict):
             self[self.ALGORITHM][self.LOGGER] = {}
         if self.IOSF not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.IOSF] = None
+        if self.EXECUTABLE_CONTAINERS not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.EXECUTABLE_CONTAINERS] = {}
         if self.TASKS not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.TASKS] = {}
-        if self.STAGES not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.STAGES] = []
-        if self.ROUNDS not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.ROUNDS] = []
         if self.PIPELINE not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.PIPELINE] = {}
 
