@@ -168,6 +168,7 @@ class Configuration(dict):
     OUTPUT_NG_FRAGMENTS = "output_non_glued_fragments"
     SELF_LOOP = "self_loop"
     EXECUTABLE_CONTAINERS = "executable_containers"
+    ENTRIES = "entries"
 
     # predefined constants
     DEFAULT_IOSF = False
@@ -222,7 +223,7 @@ class Configuration(dict):
         if self.IOSF not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.IOSF] = None
         if self.EXECUTABLE_CONTAINERS not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.EXECUTABLE_CONTAINERS] = {}
+            self[self.ALGORITHM][self.EXECUTABLE_CONTAINERS] = []
         if self.TASKS not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.TASKS] = {}
         if self.PIPELINE not in self[self.ALGORITHM]:
@@ -358,6 +359,8 @@ class Configuration(dict):
             self[self.ALGORITHM][self.IOSF] = self[self.IOSF]
         if self.TASKS not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.TASKS] = {}
+        if self.EXECUTABLE_CONTAINERS not in self[self.ALGORITHM]:
+            self[self.ALGORITHM][self.EXECUTABLE_CONTAINERS] = []
         if self.PATHS not in self[self.ALGORITHM][self.TASKS] or self[self.ALGORITHM][self.TASKS][self.PATHS] in ("", None):
             self[self.ALGORITHM][self.TASKS][self.PATHS] = []
         self[self.ALGORITHM][self.TASKS][self.PATHS] = [self.DEFAULT_ALGORITHM_TASKS_PATH] + self[self.ALGORITHM][self.TASKS][self.PATHS]
@@ -387,8 +390,8 @@ class Configuration(dict):
                                    source_logger=self[self.ALGORITHM][self.LOGGER])
         if self.IOSF not in self[self.ALGORITHM][self.PIPELINE] or self[self.ALGORITHM][self.PIPELINE][self.IOSF] in ("", None):
             self[self.ALGORITHM][self.PIPELINE][self.IOSF] = self[self.ALGORITHM][self.IOSF]
-        if self.ROUNDS not in self[self.ALGORITHM][self.PIPELINE] or self[self.ALGORITHM][self.PIPELINE][self.ROUNDS] in ("", None):
-            self[self.ALGORITHM][self.PIPELINE][self.ROUNDS] = []
+        if self.ENTRIES not in self[self.ALGORITHM][self.PIPELINE] or self[self.ALGORITHM][self.PIPELINE][self.ENTRIES] in ("", None):
+            self[self.ALGORITHM][self.PIPELINE][self.ENTRIES] = []
         if self.SELF_LOOP not in self[self.ALGORITHM][self.PIPELINE] or self[self.ALGORITHM][self.PIPELINE][self.SELF_LOOP] in ("", None):
             self[self.ALGORITHM][self.PIPELINE][self.SELF_LOOP] = self.DEFAULT_ALGORITHM_PIPELINE_SELF_LOOP
 
