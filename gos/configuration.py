@@ -361,27 +361,11 @@ class Configuration(dict):
             self[self.ALGORITHM][self.TASKS] = {}
         if self.EXECUTABLE_CONTAINERS not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.EXECUTABLE_CONTAINERS] = []
+
         if self.PATHS not in self[self.ALGORITHM][self.TASKS] or self[self.ALGORITHM][self.TASKS][self.PATHS] in ("", None):
             self[self.ALGORITHM][self.TASKS][self.PATHS] = []
         self[self.ALGORITHM][self.TASKS][self.PATHS] = [self.DEFAULT_ALGORITHM_TASKS_PATH] + self[self.ALGORITHM][self.TASKS][self.PATHS]
-        if self.STAGES not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.STAGES] = []
-        for stage in self[self.ALGORITHM][self.STAGES]:
-            if self.SELF_LOOP not in stage or stage[self.SELF_LOOP] in ("", None):
-                stage[self.SELF_LOOP] = self.DEFAULT_ALGORITHM_STAGES_SELF_LOOP
-            if self.LOGGER not in stage:
-                stage[self.LOGGER] = {}
-            self._update_logger_config(logger_to_update=stage[self.LOGGER],
-                                       source_logger=self[self.ALGORITHM][self.LOGGER])
-        if self.ROUNDS not in self[self.ALGORITHM]:
-            self[self.ALGORITHM][self.ROUNDS] = []
-        for round in self[self.ALGORITHM][self.ROUNDS]:
-            if self.SELF_LOOP not in round or round[self.SELF_LOOP] in ("", None):
-                round[self.SELF_LOOP] = self.DEFAULT_ALGORITHM_ROUND_SELF_LOOP
-            if self.LOGGER not in round:
-                round[self.LOGGER] = {}
-            self._update_logger_config(logger_to_update=round[self.LOGGER],
-                                       source_logger=self[self.ALGORITHM][self.LOGGER])
+
         if self.PIPELINE not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.PIPELINE] = {}
         if self.LOGGER not in self[self.ALGORITHM][self.PIPELINE] or self[self.ALGORITHM][self.PIPELINE][self.LOGGER] in ("", None):
