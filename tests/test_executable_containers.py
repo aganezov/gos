@@ -21,6 +21,9 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_entries_type_name_attribute(self):
         self.assertTrue(hasattr(self.ec, "entries_type_name"))
 
+    def test_type_name_attribute(self):
+        self.assertTrue(hasattr(self.ec, "type_name"))
+
     def test_entries_info_attribute(self):
         self.assertTrue(hasattr(self.ec, "entries_names"))
 
@@ -113,15 +116,24 @@ class BaseStageTestCase(unittest.TestCase):
     def test_base_stage_executable_container_entries_type_name_attribute(self):
         self.assertEqual(Stage.entries_type_name, "task")
 
+    def test_base_stage_executable_container_type_name(self):
+        self.assertEqual(Stage.type_name, "stage")
+
 
 class BaseRoundTestCase(unittest.TestCase):
     def test_base_round_executable_container_entries_type_name_attribute(self):
         self.assertEqual(Round.entries_type_name, "stage")
 
+    def test_base_round_executable_container_type_name(self):
+        self.assertEqual(Round.type_name, "round")
+
 
 class PipelineTestCase(unittest.TestCase):
     def test_pipeline_executable_container_entries_type_name_attribute(self):
         self.assertEqual(Pipeline.entries_type_name, "round")
+
+    def test_pipeline_executable_container_type_name(self):
+        self.assertEqual(Pipeline.type_name, "pipeline")
 
 
 if __name__ == '__main__':
