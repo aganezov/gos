@@ -525,6 +525,63 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.PIPELINE],
                              predefined_algorithm_config[self.init_config.PIPELINE])
 
+    def test_update_with_default_algorithm_specified_executable_container_instantiation(self):
+        self.set_up_executable_containers_for_algorithm_section()
+        self.init_config.update_with_default_values()
+        self.assertIsInstance(self.init_config[self.init_config.ALGORITHM]["stages"], list)
+
+    def set_up_executable_containers_for_algorithm_section(self):
+        ecs = [
+            {
+                "name": "stage",
+                "reference": "stages",
+                "entry_type_name": "task"
+            }
+        ]
+        self.init_config[self.init_config.ALGORITHM][self.init_config.EXECUTABLE_CONTAINERS] = ecs
+
+    def test_update_with_default_algorithm_automatically_generated_reference_for_executable_container(self):
+        self.init_config[self.init_config.ALGORITHM][self.init_config.EXECUTABLE_CONTAINERS] = [{
+            "name": "stage",
+            "entry_type_name": "task"
+        }]
+        self.init_config.update_with_default_values()
+        ecs = self.init_config[self.init_config.ALGORITHM][self.init_config.EXECUTABLE_CONTAINERS]
+        self.assertEqual(ecs[0]["reference"], "stages")
+
+    def test_update_with_default_algorithm_specified_executable_container_partially_specification(self):
+        self.set_up_executable_containers_for_algorithm_section()
+        self.init_config[self.init_config.ALGORITHM]["stages"] = [
+            {
+                self.init_config.NAME: "stage1",
+            },
+            {
+                self.init_config.NAME: "stage2",
+                self.init_config.ENTRIES: ["task1", "task2"]
+            },
+            {
+                self.init_config.NAME: "stage3",
+                self.init_config.SELF_LOOP: False,
+                self.init_config.ENTRIES: ["task1", "task2", "task3"]
+            }
+        ]
+        self.init_config.update_with_default_values()
+        stages = self.init_config[self.init_config.ALGORITHM]["stages"]
+        self.assertIsInstance(stages, list)
+        self.assertEqual(len(stages), 3)
+        stage1, stage2, stage3 = stages
+        self.assertEqual(stage1[self.init_config.NAME], "stage1")
+        self.assertEqual(stage1[self.init_config.SELF_LOOP], self.init_config.DEFAULT_ALGORITHM_EC_SELF_LOOP)
+        self.assertListEqual(stage1[self.init_config.ENTRIES], [])
+
+        self.assertEqual(stage2[self.init_config.NAME], "stage2")
+        self.assertEqual(stage2[self.init_config.SELF_LOOP], self.init_config.DEFAULT_ALGORITHM_EC_SELF_LOOP)
+        self.assertListEqual(stage2[self.init_config.ENTRIES], ["task1", "task2"])
+
+        self.assertEqual(stage3[self.init_config.NAME], "stage3")
+        self.assertEqual(stage3[self.init_config.SELF_LOOP], False)
+        self.assertListEqual(stage3[self.init_config.ENTRIES], ["task1", "task2", "task3"])
+
 
 if __name__ == '__main__':
     unittest.main()

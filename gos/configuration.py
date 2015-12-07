@@ -169,6 +169,7 @@ class Configuration(dict):
     SELF_LOOP = "self_loop"
     EXECUTABLE_CONTAINERS = "executable_containers"
     ENTRIES = "entries"
+    REFERENCE = "reference"
 
     # predefined constants
     DEFAULT_IOSF = False
@@ -187,8 +188,7 @@ class Configuration(dict):
     DEFAULT_OUTPUT_GENOMES_DIR = "genomes"
     DEFAULT_ALGORITHM_TASKS_PATH = "./tasks"
     DEFAULT_ALGORITHM_PIPELINE_SELF_LOOP = True
-    DEFAULT_ALGORITHM_ROUND_SELF_LOOP = True
-    DEFAULT_ALGORITHM_STAGES_SELF_LOOP = True
+    DEFAULT_ALGORITHM_EC_SELF_LOOP = True
     DEFAULT_LOGGER_DESTINATION = None
 
     def __init__(self, *args, **kwargs):
@@ -365,6 +365,17 @@ class Configuration(dict):
         if self.PATHS not in self[self.ALGORITHM][self.TASKS] or self[self.ALGORITHM][self.TASKS][self.PATHS] in ("", None):
             self[self.ALGORITHM][self.TASKS][self.PATHS] = []
         self[self.ALGORITHM][self.TASKS][self.PATHS] = [self.DEFAULT_ALGORITHM_TASKS_PATH] + self[self.ALGORITHM][self.TASKS][self.PATHS]
+
+        for ecs in self[self.ALGORITHM][self.EXECUTABLE_CONTAINERS]:
+            if self.REFERENCE not in ecs:
+                ecs[self.REFERENCE] = ecs[self.NAME] + "s"
+            if ecs[self.REFERENCE] not in self[self.ALGORITHM]:
+                self[self.ALGORITHM][ecs[self.REFERENCE]] = []
+            for executable_container in self[self.ALGORITHM][ecs[self.REFERENCE]]:
+                if self.SELF_LOOP not in executable_container:
+                    executable_container[self.SELF_LOOP] = self.DEFAULT_ALGORITHM_EC_SELF_LOOP
+                if self.ENTRIES not in executable_container:
+                    executable_container[self.ENTRIES] = []
 
         if self.PIPELINE not in self[self.ALGORITHM]:
             self[self.ALGORITHM][self.PIPELINE] = {}

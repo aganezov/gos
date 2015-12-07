@@ -9,6 +9,7 @@ from gos.utils.load import Loader
 
 class ExecutableContainer(object):
     name = "executable_container"
+    type_name = "executable_container"
 
     DEFAULT_SELF_LOOP = False
     DEFAULT_ENTRIES_TYPE_NAME = None
