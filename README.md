@@ -1,2 +1,2 @@
-GENE ORDER SCAFFOLDING
-======================
+# gos
+Generically organizable supervisor 

@@ -16,6 +16,8 @@ def write_grimm_file(gene_order_file, gene_mapping_file, output_file=None, genom
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         output_file = os.path.join(output_dir, basename.replace(".txt", ".grimm"))
+    for chromosome in genome.keys():
+            genome[chromosome].sort(key=lambda entry: (entry.start_coordinate + entry.end_coordinate) / 2)
     with open(output_file, "wt") as destination:
         print(">", genome_name, file=destination)
         for fragment, gene_order in genome.items():
