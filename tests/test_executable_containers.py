@@ -130,7 +130,7 @@ class BaseRoundTestCase(unittest.TestCase):
 
 class PipelineTestCase(unittest.TestCase):
     def test_pipeline_executable_container_entries_type_name_attribute(self):
-        self.assertEqual(Pipeline.entries_type_name, "round")
+        self.assertIsNone(Pipeline.entries_type_name)
 
     def test_pipeline_executable_container_type_name(self):
         self.assertEqual(Pipeline.type_name, "pipeline")

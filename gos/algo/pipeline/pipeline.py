@@ -3,5 +3,5 @@ from gos.executable_containers import ExecutableContainer
 
 
 class Pipeline(ExecutableContainer):
-    entries_type_name = "round"
+    entries_type_name = None
     type_name = "pipeline"
