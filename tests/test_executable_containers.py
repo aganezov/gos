@@ -3,10 +3,10 @@ import importlib
 import tempfile
 import unittest
 
-from gos.algo.pipeline.pipeline import Pipeline
-from gos.algo.rounds.base_round import Round
+from gos.algo.executable_containers.base_round import Round
+from gos.algo.executable_containers.base_stage import Stage
+from gos.algo.executable_containers.pipeline import Pipeline
 from gos.exceptions import GOSExecutableContainerException, GOSIOException
-from gos.algo.stages.base_stage import Stage
 from gos.executable_containers import ExecutableContainer
 
 
