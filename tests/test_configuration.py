@@ -59,6 +59,11 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertIsInstance(output_section[config.ASSEMBLY_POINTS], dict)
         self.assertIsInstance(output_section[config.GENOMES], dict)
 
+    def test_initialization_algorithm_section_executable_containers(self):
+        config = Configuration()
+        algorithm_section = config[config.ALGORITHM]
+        self.assertIn(config.EXECUTABLE_CONTAINERS, algorithm_section)
+
     def test_initialization_algorithm_section(self):
         """ algorithm section configuration for GOS workflow """
         config = Configuration()
@@ -66,12 +71,8 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertIn(config.IOSF, algorithm_section)
         self.assertIn(config.LOGGER, algorithm_section)
         self.assertIn(config.TASKS, algorithm_section)
-        self.assertIn(config.STAGES, algorithm_section)
-        self.assertIn(config.ROUNDS, algorithm_section)
         self.assertIn(config.PIPELINE, algorithm_section)
 
-        self.assertIsInstance(algorithm_section[config.STAGES], list)
-        self.assertIsInstance(algorithm_section[config.ROUNDS], list)
         self.assertIsInstance(algorithm_section[config.TASKS], dict)
         self.assertIsInstance(algorithm_section[config.PIPELINE], dict)
 
@@ -214,15 +215,15 @@ class ConfigurationTestCase(unittest.TestCase):
             self.init_config.DESTINATION: "destination 2"
         }]
 
-    def tet_update_with_default_input_logger_empty(self):
-        for empty_value in (None, "", {}):
-            top_level_loggers = self.get_list_of_logger_configurations()
-            for logger_config in top_level_loggers:
-                self.init_config[self.init_config.INPUT][self.init_config.LOGGER] = empty_value
-                self.init_config[self.init_config.LOGGER] = logger_config
-                self.init_config.update_with_default_values()
-                self.assertDictEqual(self.init_config[self.init_config.INPUT][self.init_config.LOGGER],
-                                     logger_config)
+    def test_update_with_default_input_logger_empty(self):
+        top_level_loggers = self.get_list_of_logger_configurations()
+        for logger_config in top_level_loggers:
+            self.init_config = Configuration()
+            self.init_config[self.init_config.INPUT][self.init_config.LOGGER] = {}
+            self.init_config[self.init_config.LOGGER] = logger_config
+            self.init_config.update_with_default_values()
+            self.assertDictEqual(self.init_config[self.init_config.INPUT][self.init_config.LOGGER],
+                                 logger_config)
 
     def test_update_with_default_input_logger_partially_predefined(self):
         partial_logger_configs = [
@@ -464,12 +465,11 @@ class ConfigurationTestCase(unittest.TestCase):
                              self.init_config[self.init_config.LOGGER])
         self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.TASKS], {
             self.init_config.PATHS: [self.init_config.DEFAULT_ALGORITHM_TASKS_PATH]})
-        self.assertEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.STAGES], [])
-        self.assertEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.ROUNDS], [])
+        self.assertEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.EXECUTABLE_CONTAINERS], [])
         expected_pipeline_config = {
             self.init_config.LOGGER: self.init_config[self.init_config.ALGORITHM][self.init_config.LOGGER],
             self.init_config.SELF_LOOP: self.init_config.DEFAULT_ALGORITHM_PIPELINE_SELF_LOOP,
-            self.init_config.ROUNDS: [],
+            self.init_config.ENTRIES: [],
             self.init_config.IOSF: self.init_config[self.init_config.ALGORITHM][self.init_config.IOSF]
         }
         self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.PIPELINE],
@@ -489,30 +489,10 @@ class ConfigurationTestCase(unittest.TestCase):
             self.assertIn(my_path,
                           self.init_config[self.init_config.ALGORITHM][self.init_config.TASKS][self.init_config.PATHS])
 
-    def test_update_with_default_algorithm_logger_for_stages(self):
-        self.init_config[self.init_config.ALGORITHM] = {
-            self.init_config.STAGES: [{
-                self.init_config.NAME: "my_stage_name",
-            }]
-        }
-        self.init_config.update_with_default_values()
-        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.STAGES][0][self.init_config.LOGGER],
-                             self.init_config[self.init_config.ALGORITHM][self.init_config.LOGGER])
-
-    def test_update_with_default_algorithm_logger_for_rounds(self):
-        self.init_config[self.init_config.ALGORITHM] = {
-            self.init_config.ROUNDS: [{
-                self.init_config.NAME: "my_round_name",
-            }]
-        }
-        self.init_config.update_with_default_values()
-        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.ROUNDS][0][self.init_config.LOGGER],
-                             self.init_config[self.init_config.ALGORITHM][self.init_config.LOGGER])
-
     def test_update_with_default_algorithm_pipeline_logger(self):
         self.init_config[self.init_config.ALGORITHM] = {
             self.init_config.PIPELINE: {
-                self.init_config.ROUNDS: []
+                self.init_config.ENTRIES: []
             }
         }
         self.init_config.update_with_default_values()
@@ -526,12 +506,10 @@ class ConfigurationTestCase(unittest.TestCase):
             self.init_config.TASKS: {
                 self.init_config.PATHS: ["my_path_1", "my_path_2"]
             },
-            self.init_config.STAGES: {},
-            self.init_config.ROUNDS: {},
             self.init_config.PIPELINE: {
                 self.init_config.LOGGER: self.get_list_of_logger_configurations()[1],
                 self.init_config.SELF_LOOP: False,
-                self.init_config.ROUNDS: ["round1", "round2"]
+                self.init_config.ENTRIES: ["round1", "round2"]
             }
         }
         self.init_config[self.init_config.ALGORITHM] = deepcopy(predefined_algorithm_config)
@@ -543,10 +521,6 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertListEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.TASKS][self.init_config.PATHS],
                              [self.init_config.DEFAULT_ALGORITHM_TASKS_PATH] +
                              predefined_algorithm_config[self.init_config.TASKS][self.init_config.PATHS])
-        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.STAGES],
-                             predefined_algorithm_config[self.init_config.STAGES])
-        self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.ROUNDS],
-                             predefined_algorithm_config[self.init_config.ROUNDS])
         predefined_algorithm_config[self.init_config.PIPELINE][self.init_config.IOSF] = self.init_config[self.init_config.ALGORITHM][self.init_config.IOSF]
         self.assertDictEqual(self.init_config[self.init_config.ALGORITHM][self.init_config.PIPELINE],
                              predefined_algorithm_config[self.init_config.PIPELINE])
