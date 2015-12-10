@@ -41,9 +41,11 @@ class TaskLoader(object):
                 continue
         return result
 
-    def load_tasks_from_dir(self, dir_path):
+    def load_tasks_from_dir(self, dir_path, propagate_exceptions=False):
         """ Imports all python modules in specified directories and returns subclasses of BaseTask from them
 
+        :param propagate_exceptions: a flag that indicates if exceptions from single file import shall be raised during the
+            whole directory lookup
         :param dir_path: fully qualified directory path, where all python modules will be search for subclasses of BaseTask
         :type dir_path: `str`
         :return: a dict of CustomTasks, where key is CustomTask.name, and value is a CustomClass task itself
@@ -58,15 +60,16 @@ class TaskLoader(object):
             full_file_path = os.path.join(dir_path, file_basename)
             try:
                 result.update(self.load_tasks_from_file(full_file_path))
-            except GOSTaskException:
-                continue
-            except GOSIOException:
-                continue
+            except (GOSTaskException, GOSIOException):
+                if propagate_exceptions:
+                    raise
         return result
 
-    def load_tasks(self, paths):
+    def load_tasks(self, paths, propagate_exception=False):
         """ Loads all subclasses of BaseTask from modules that are contained in supplied directory paths or direct module paths
 
+        :param propagate_exception: a flag that indicates if exceptions from single file import shall be raised during the
+            whole directory lookup
         :param paths: an iterable of fully qualified paths to python modules / directories, from where we import subclasses of BaseClass
         :type paths: `iterable`(`str`)
         :return: a dict of CustomTasks, where key is CustomTask.name, and value is a CustomClass task itself
@@ -77,13 +80,12 @@ class TaskLoader(object):
             for path in paths:
                 try:
                     if os.path.isdir(path):
-                        result.update(self.load_tasks_from_dir(path))
+                        result.update(self.load_tasks_from_dir(dir_path=path, propagate_exceptions=propagate_exception))
                     elif os.path.isfile(path):
-                        result.update(self.load_tasks_from_file(path))
-                except GOSTaskException:
-                    continue
-                except GOSIOException:
-                    continue
+                        result.update(self.load_tasks_from_file(file_path=path))
+                except (GOSTaskException, GOSIOException):
+                    if propagate_exception:
+                        raise
             return result
         except TypeError:
             raise GOSTaskException("Argument for `load_tasks` method must be iterable")
