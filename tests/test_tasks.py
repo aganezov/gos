@@ -257,5 +257,30 @@ class TaskLoaderTestCase(unittest.TestCase):
         tmp_dir1.cleanup()
         tmp_dir2.cleanup()
 
+    def test_load_tasks_from_dir_TaskException_propagation(self):
+        tmp_dir = self._prepare_for_TaskException_propagation_test()
+        with self.assertRaises(GOSTaskException):
+            TaskLoader().load_tasks_from_dir(dir_path=tmp_dir.name, propagate_exceptions=True)
+        tmp_dir.cleanup()
+
+    def _prepare_for_TaskException_propagation_test(self):
+        tmp_dir = tempfile.TemporaryDirectory()
+        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_file1.write(self.get_base_task_import_code_string())
+        tmp_file1.write(self.get_custom_task_files_values()[0])
+        tmp_file1.flush()
+        tmp_file2.write(self.get_base_task_import_code_string())
+        tmp_file2.write("""class Task(BaseTask):\n\tdef run(self, assembler_manager):\n\t\tpass\n""")
+        tmp_file2.flush()
+        importlib.invalidate_caches()
+        return tmp_dir
+
+    def test_load_tasks_from_dir_no_TaskException_propagation(self):
+        tmp_dir = self._prepare_for_TaskException_propagation_test()
+        result = TaskLoader().load_tasks_from_dir(dir_path=tmp_dir.name, propagate_exceptions=False)
+        self.assertIn("my_task_one", result)
+        tmp_dir.cleanup()
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
-
-import importlib
-
 import os
 from gos.exceptions import GOSTaskException, GOSIOException
 from gos.utils.load import Loader
