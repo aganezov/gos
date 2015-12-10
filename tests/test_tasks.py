@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+import unittest
+
 import importlib
 import os
 import tempfile
-import unittest
-
 from gos.exceptions import GOSTaskException, GOSIOException
 from gos.tasks import BaseTask, TaskLoader
 
@@ -47,7 +47,7 @@ class TaskLoaderTestCase(unittest.TestCase):
         source_file.write(self.get_base_task_import_code_string())
         source_file.write(bad_class_code)
         source_file.flush()
-        importlib.invalidate_caches()           # importlib invalidate_caches call is required due to this python issue: http://bugs.python.org/issue23412
+        importlib.invalidate_caches()  # importlib invalidate_caches call is required due to this python issue: http://bugs.python.org/issue23412
         source_file_name = source_file.name
         with self.assertRaises(GOSTaskException):
             TaskLoader().load_tasks_from_file(source_file_name)
@@ -305,7 +305,6 @@ class TaskLoaderTestCase(unittest.TestCase):
         self.assertIn("my_task_one", result)
         self.assertIn("my_task_two", result)
         tmp_dir.cleanup()
-
 
 
 if __name__ == '__main__':
