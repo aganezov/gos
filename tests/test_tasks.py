@@ -282,5 +282,31 @@ class TaskLoaderTestCase(unittest.TestCase):
         self.assertIn("my_task_one", result)
         tmp_dir.cleanup()
 
+    def test_load_tasks_TaskException_propagation(self):
+        tmp_dir = self._prepare_for_TaskException_propagation_test()
+        tmp_file3 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", delete=True)
+        tmp_file3.write(self.get_base_task_import_code_string())
+        tmp_file3.write(self.get_custom_task_files_values()[1])
+        tmp_file3.flush()
+        importlib.invalidate_caches()
+        with self.assertRaises(GOSTaskException):
+            TaskLoader().load_tasks(paths=[tmp_dir.name, tmp_file3.name], propagate_exception=True)
+        tmp_dir.cleanup()
+
+    def test_load_tasks_no_TaskException_propagation(self):
+        tmp_dir = self._prepare_for_TaskException_propagation_test()
+        tmp_file3 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", delete=True)
+        tmp_file3.write(self.get_base_task_import_code_string())
+        tmp_file3.write(self.get_custom_task_files_values()[1])
+        tmp_file3.flush()
+        importlib.invalidate_caches()
+        result = TaskLoader().load_tasks(paths=[tmp_dir.name, tmp_file3.name], propagate_exception=False)
+        self.assertEqual(len(result), 3)  # base + two valid tasks
+        self.assertIn("my_task_one", result)
+        self.assertIn("my_task_two", result)
+        tmp_dir.cleanup()
+
+
+
 if __name__ == '__main__':
     unittest.main()
