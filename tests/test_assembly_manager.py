@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
-import importlib
-
-import tempfile
 import unittest
 
-from gos.assembly_manager import AssemblyManager
+import importlib
+import tempfile
 from gos.configuration import Configuration
 from gos.exceptions import GOSTaskException, GOSCriticalException
+from gos.manager import Manager
 from gos.tasks import BaseTask, TaskLoader
 from tests.test_tasks import TaskLoaderTestCase
 
 
-class AssemblyManagerTestCase(unittest.TestCase):
+class ManagerTestCase(unittest.TestCase):
     def setUp(self):
-        self.am = AssemblyManager(config=Configuration())
+        self.am = Manager(config=Configuration())
 
     def test_manager_init(self):
         config = Configuration()
-        am = AssemblyManager(config=config)
+        am = Manager(config=config)
         self.assertDictEqual(config, am.configuration)
 
     def create_correct_temporary_tasks_files(self):
@@ -88,7 +87,7 @@ class AssemblyManagerTestCase(unittest.TestCase):
             def __init__(self):
                 self.a = [1, 2, 3][3]
 
-            def run(self, assembler_manager):
+            def run(self, manager):
                 pass
         return ErrorTask
 
@@ -105,7 +104,7 @@ class AssemblyManagerTestCase(unittest.TestCase):
         class MyTask(BaseTask):
             name = "my_task"
 
-            def run(self, assembler_manager):
+            def run(self, manager):
                 pass
 
         return MyTask

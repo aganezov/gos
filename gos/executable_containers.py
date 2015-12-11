@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import importlib
-import sys
 
 import os
 from gos.exceptions import GOSExecutableContainerException
@@ -30,7 +28,7 @@ class ExecutableContainer(object):
         self.entries_type_name = entries_type_name
         self.logger = logger
 
-    def run(self, assembler_manager):
+    def run(self, manager):
         pass
 
     @staticmethod

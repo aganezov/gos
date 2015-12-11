@@ -4,7 +4,7 @@ from gos.exceptions import GOSTaskException, GOSCriticalException
 from gos.tasks import TaskLoader
 
 
-class AssemblyManager(object):
+class Manager(object):
     def __init__(self, config):
         self.configuration = config
         self.tasks_classes = {}

@@ -9,7 +9,7 @@ class BaseTask(object):
     self_loop = False
     do_self_loop = False
 
-    def run(self, assembler_manager):
+    def run(self, manager):
         raise NotImplemented("run method shall be implemented for all the subclasses of BaseTask")
 
 
