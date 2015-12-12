@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import importlib
-import tempfile
 import unittest
 
+import importlib
+import tempfile
 from gos.algo.executable_containers.base_round import Round
 from gos.algo.executable_containers.base_stage import Stage
 from gos.algo.executable_containers.pipeline import Pipeline
@@ -19,7 +19,7 @@ class ExecutableContainerTestCase(unittest.TestCase):
         self.assertTrue(hasattr(self.ec, "name"))
 
     def test_entries_type_name_attribute(self):
-        self.assertTrue(hasattr(self.ec, "entries_type_name"))
+        self.assertTrue(hasattr(self.ec, "entries_type_names"))
 
     def test_type_name_attribute(self):
         self.assertTrue(hasattr(self.ec, "type_name"))
@@ -103,18 +103,18 @@ class ExecutableContainerTestCase(unittest.TestCase):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file.write(self.get_executable_container_import_string())
         tmp_file.write(
-            """class MyContainer(ExecutableContainer):\n\tname="my_ec"\n\tdef setup(self):\n\t\tself.entries_names = ["entry1"]\n\t\tself.entries_type_name="task" """)
+                """class MyContainer(ExecutableContainer):\n\tname="my_ec"\n\tdef setup(self):\n\t\tself.entries_names = ["entry1"]\n\t\tself.entries_type_names=["task"] """)
         tmp_file.flush()
         importlib.invalidate_caches()
         result = ExecutableContainer.setup_from_file(tmp_file.name, container_name="my_ec")
         self.assertIsInstance(result, ExecutableContainer)
         self.assertListEqual(result.entries_names, ["entry1"])
-        self.assertEqual(result.entries_type_name, "task")
+        self.assertListEqual(result.entries_type_names, ["task"])
 
 
 class BaseStageTestCase(unittest.TestCase):
     def test_base_stage_executable_container_entries_type_name_attribute(self):
-        self.assertEqual(Stage.entries_type_name, "task")
+        self.assertListEqual(Stage.entries_type_names, ["task"])
 
     def test_base_stage_executable_container_type_name(self):
         self.assertEqual(Stage.type_name, "stage")
@@ -122,7 +122,7 @@ class BaseStageTestCase(unittest.TestCase):
 
 class BaseRoundTestCase(unittest.TestCase):
     def test_base_round_executable_container_entries_type_name_attribute(self):
-        self.assertEqual(Round.entries_type_name, "stage")
+        self.assertListEqual(Round.entries_type_names, ["stage"])
 
     def test_base_round_executable_container_type_name(self):
         self.assertEqual(Round.type_name, "round")
@@ -130,7 +130,7 @@ class BaseRoundTestCase(unittest.TestCase):
 
 class PipelineTestCase(unittest.TestCase):
     def test_pipeline_executable_container_entries_type_name_attribute(self):
-        self.assertIsNone(Pipeline.entries_type_name)
+        self.assertIsNone(Pipeline.entries_type_names)
 
     def test_pipeline_executable_container_type_name(self):
         self.assertEqual(Pipeline.type_name, "pipeline")
