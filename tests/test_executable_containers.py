@@ -18,11 +18,14 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_name_attribute(self):
         self.assertTrue(hasattr(self.ec, "name"))
 
-    def test_entries_type_name_attribute(self):
-        self.assertTrue(hasattr(self.ec, "entries_type_names"))
-
     def test_type_name_attribute(self):
         self.assertTrue(hasattr(self.ec, "type_name"))
+
+    def test_group_reference_name_attribute(self):
+        self.assertTrue(hasattr(self.ec, "group_reference_name"))
+
+    def test_entries_type_name_attribute(self):
+        self.assertTrue(hasattr(self.ec, "entries_type_names"))
 
     def test_entries_info_attribute(self):
         self.assertTrue(hasattr(self.ec, "entries_names"))
@@ -42,6 +45,10 @@ class ExecutableContainerTestCase(unittest.TestCase):
 
     def test_logger_attribute(self):
         self.assertTrue(hasattr(self.ec, "logger"))
+
+    def test_default_group_reference_name_attribute(self):
+        ec = ExecutableContainer(name="test")
+        self.assertEqual(ec.group_reference_name, "tests")
 
     def test_setup_from_config_no_name(self):
         with self.assertRaises(GOSExecutableContainerException):

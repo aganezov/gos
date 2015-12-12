@@ -25,8 +25,15 @@ class ExecutableContainer(object):
         if entries is None:
             entries = []
         self.entries = entries
+        self.group_reference_name = self.group_reference_name if \
+            hasattr(self, "group_reference_name") and self.group_reference_name is not None else \
+            self._get_default_group_reference_name()
+
         self.entries_type_names = DEFAULT_ENTRIES_TYPE_NAMES[:] if entries_type_names is None else entries_type_names
         self.logger = logger
+
+    def _get_default_group_reference_name(self):
+        return self.name + "s"
 
     def run(self, manager):
         pass
