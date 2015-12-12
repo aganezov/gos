@@ -15,6 +15,12 @@ class ExecutableContainerTestCase(unittest.TestCase):
         self.executable_container = ExecutableContainer()
         self.ec = self.executable_container
 
+    ################################################################################
+    #
+    # testing attributes, that are utilized in referencing the EC object itself
+    #
+    ################################################################################
+
     def test_name_attribute(self):
         self.assertTrue(hasattr(self.ec, "name"))
 
@@ -23,6 +29,13 @@ class ExecutableContainerTestCase(unittest.TestCase):
 
     def test_group_reference_name_attribute(self):
         self.assertTrue(hasattr(self.ec, "group_reference_name"))
+
+    ################################################################################
+    #
+    # testing attributes, that are utilized in referencing other EC / tasks that
+    #      this EC object is working with
+    #
+    ################################################################################
 
     def test_entries_type_name_attribute(self):
         self.assertTrue(hasattr(self.ec, "entries_type_names"))
@@ -33,6 +46,11 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_entries_attribute(self):
         self.assertTrue(hasattr(self.ec, "entries"))
 
+    ################################################################################
+    #
+    # testing internal attributes and methods for the EC object
+    #
+    ################################################################################
     def test_self_loop_attribute(self):
         self.assertTrue(hasattr(self.ec, "self_loop"))
 
@@ -46,6 +64,11 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_logger_attribute(self):
         self.assertTrue(hasattr(self.ec, "logger"))
 
+    ################################################################################
+    #
+    # testing logic of EC object
+    #
+    ################################################################################
     def test_default_group_reference_name_attribute(self):
         ec = ExecutableContainer(name="test")
         self.assertEqual(ec.group_reference_name, "tests")
