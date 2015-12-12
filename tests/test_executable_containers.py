@@ -73,6 +73,53 @@ class ExecutableContainerTestCase(unittest.TestCase):
         ec = ExecutableContainer(name="test")
         self.assertEqual(ec.group_reference_name, "tests")
 
+    def test_initialization_with_class_defined_entries_names_value(self):
+        entry_ = ["entry1", "entry2", "entry3"]
+
+        class MyEC(ExecutableContainer):
+            entries_names = entry_
+
+        value = MyEC()
+        self.assertListEqual(value.entries_names, entry_)
+
+    def test_initialization_with_no_defined_entries_names_values(self):
+        class MyEC(ExecutableContainer):
+            pass
+
+        self.assertListEqual(MyEC().entries_names, [])
+
+    def test_initialization_with_specified_entries_names_value(self):
+        class MyEC(ExecutableContainer):
+            pass
+
+        value_ = ["task1", "round1", "value1"]
+        self.assertListEqual(MyEC(entries_names=value_).entries_names, value_)
+
+    def test_initialization_with_class_defined_entries_type_names(self):
+        entry_ = ["task", "round"]
+
+        class MyEC(ExecutableContainer):
+            entries_type_names = entry_
+
+        value = MyEC()
+        self.assertListEqual(value.entries_type_names, entry_)
+
+    def test_initialization_with_no_defined_entries_type_names_value(self):
+        class MyEC(ExecutableContainer):
+            pass
+
+        self.assertEqual(MyEC().entries_type_names, [])
+
+    def test_initialization_with_specified_entries_type_names_value(self):
+        class MyEC(ExecutableContainer):
+            pass
+
+        value_ = ["task", "round", "value"]
+        self.assertListEqual(MyEC(entries_type_names=value_).entries_type_names, value_)
+
+    def test_initialization_entries_by_default_are_empty_list(self):
+        self.assertListEqual(ExecutableContainer().entries, [])
+
     def test_setup_from_config_no_name(self):
         with self.assertRaises(GOSExecutableContainerException):
             ExecutableContainer.setup_from_config(config={})

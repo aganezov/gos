@@ -4,7 +4,6 @@ import os
 from gos.exceptions import GOSExecutableContainerException
 from gos.utils.load import Loader
 
-DEFAULT_ENTRIES_TYPE_NAMES = []
 DEFAULT_SELF_LOOP = False
 
 
@@ -14,22 +13,21 @@ class ExecutableContainer(object):
 
     def __init__(self, name=None, self_loop=DEFAULT_SELF_LOOP, do_self_loop=False, entries_names=None, entries=None,
                  entries_type_names=None, logger=None):
-        if name is None:
-            name = self.__class__.name
-        self.name = name
-        self.self_loop = self_loop
-        self.do_self_loop = do_self_loop
-        if entries_names is None:
-            entries_names = []
-        self.entries_names = entries_names
-        if entries is None:
-            entries = []
-        self.entries = entries
+        self.name = self.__class__.name if name is None else name
         self.group_reference_name = self.group_reference_name if \
             hasattr(self, "group_reference_name") and self.group_reference_name is not None else \
             self._get_default_group_reference_name()
 
-        self.entries_type_names = DEFAULT_ENTRIES_TYPE_NAMES[:] if entries_type_names is None else entries_type_names
+        if entries_names is None:
+            entries_names = self.entries_names if hasattr(self, "entries_names") else []
+        self.entries_names = entries_names
+        if entries_type_names is None:
+            entries_type_names = self.entries_type_names if hasattr(self, "entries_type_names") else []
+        self.entries_type_names = entries_type_names
+        self.entries = [] if entries is None else entries
+
+        self.self_loop = self_loop
+        self.do_self_loop = do_self_loop
         self.logger = logger
 
     def _get_default_group_reference_name(self):
