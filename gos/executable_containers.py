@@ -34,7 +34,12 @@ class ExecutableContainer(object):
         return self.name + "s"
 
     def run(self, manager):
-        pass
+        for entry in self.entries:
+            entry.do_self_loop = False
+            entry.run(manager=manager)
+            while entry.self_loop and entry.do_self_loop:
+                entry.do_self_loop = False
+                entry.run(manager=manager)
 
     @staticmethod
     def setup_from_config(config, entries_names_list_reference="entries"):
