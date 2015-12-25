@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from gos.configuration import Configuration
 from gos.exceptions import GOSTaskException, GOSCriticalException
 from gos.tasks import TaskLoader
@@ -9,6 +10,8 @@ class Manager(object):
         self.configuration = config
         self.tasks_classes = {}
         self.tasks_instances = {}
+        self.executable_containers_classes = {}
+        self.executable_containers_instances = {}
 
     def initiate_tasks(self):
         """ Loads all tasks using `TaskLoader` from respective configuration option """
