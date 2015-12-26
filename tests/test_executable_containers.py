@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import unittest
 
 import importlib
@@ -8,12 +9,15 @@ from gos.algo.executable_containers.base_stage import Stage
 from gos.algo.executable_containers.pipeline import Pipeline
 from gos.exceptions import GOSExecutableContainerException, GOSIOException
 from gos.executable_containers import ExecutableContainer
+from manager import Manager
 
 
 class ExecutableContainerTestCase(unittest.TestCase):
     def setUp(self):
         self.executable_container = ExecutableContainer()
         self.ec = self.executable_container
+        self.dm = Manager({})
+        self.dm.logger = logging.getLogger()
 
     ################################################################################
     #
@@ -122,18 +126,19 @@ class ExecutableContainerTestCase(unittest.TestCase):
 
     def test_setup_from_config_no_name(self):
         with self.assertRaises(GOSExecutableContainerException):
-            ExecutableContainer.setup_from_config(config={})
+            ExecutableContainer.setup_from_config(manager=self.dm, config={})
 
     def test_setup_from_config_self_loop_value(self):
-        ec = ExecutableContainer.setup_from_config({"name": "my_name",
-                                                    "self_loop": False})
+        ec = ExecutableContainer.setup_from_config(config={"name": "my_name",
+                                                           "self_loop": False},
+                                                   manager=self.dm)
         self.assertFalse(ec.self_loop)
 
     def test_setup_from_config_entries_names(self):
         stage_name_list = ["stage1", "stage2", "stage3"]
-        ec = ExecutableContainer.setup_from_config({"name": "my_name",
-                                                    "stages": stage_name_list},
-                                                   entries_names_list_reference="stages")
+        ec = ExecutableContainer.setup_from_config(config={"name": "my_name",
+                                                           "entries_names": stage_name_list},
+                                                   manager=self.dm)
         self.assertListEqual(ec.entries_names, stage_name_list)
 
     def test_setup_from_file_file_does_not_exists(self):

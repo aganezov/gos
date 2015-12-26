@@ -4,7 +4,7 @@ import unittest
 import importlib
 import tempfile
 from gos.configuration import Configuration
-from gos.exceptions import GOSTaskException, GOSCriticalException
+from gos.exceptions import GOSTaskException
 from gos.manager import Manager
 from gos.tasks import BaseTask, TaskLoader
 from tests.test_tasks import TaskLoaderTestCase
@@ -97,7 +97,7 @@ class ManagerTestCase(unittest.TestCase):
         self.assertEqual(self.am.get_task_instance(task.name), task)
 
     def test_manager_get_task_name_does_not_exist(self):
-        with self.assertRaises(GOSCriticalException):
+        with self.assertRaises(KeyError):
             self.am.get_task_instance("non_existing_name")
 
     def _get_my_task_class(self):
