@@ -7,8 +7,9 @@ except ImportError:
     from distutils.core import setup
 
 setup(name="gos",
-      version="0.1.0",
-      packages=["gos", "tests"],
+      version="0.1.1",
+      packages=["gos", "tests", "gos.utils",
+                "gos.algo", "gos.algo.executable_containers"],
       install_requires=list(map(lambda entry: entry.strip(), open("requirements.txt", "rt").readlines())),
       author="Sergey Aganezov",
       author_email="aganezov@gwu.edu",
