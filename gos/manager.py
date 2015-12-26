@@ -1,55 +1,8 @@
 # -*- coding: utf-8 -*-
-import logging
-
-import os
 from executable_containers import ExecutableContainer
 from gos.configuration import Configuration
 from gos.exceptions import GOSTaskException
 from gos.tasks import TaskLoader
-
-test_config = {
-    "algorithm": {
-        "tasks": {
-            "paths": [os.path.dirname(__file__) + "/../draft/tasks.py"]
-        },
-        "executable_containers": [
-            {
-                "name": "stage",
-                "reference": "stages"
-            },
-            {
-                "name": "round",
-                "reference": "rounds"
-            }
-        ],
-        "stages": [
-            {
-                "name": "stage1",
-                "entries_names": ["task1", "task2"]
-            },
-            {
-                "name": "stage2",
-                "entries_names": ["task3"]
-            }
-        ],
-
-        "rounds": [
-            {
-                "name": "round1",
-                "entries_names": ["stage1", "stage2"]
-            },
-            {
-                "name": "round2",
-                "entries_names": ["stage2"]
-            }
-        ],
-
-        "pipeline": {
-            "entries_names": ["round1", "round2"],
-            "self_loop": True
-        }
-    }
-}
 
 
 class Manager(object):
@@ -107,12 +60,3 @@ class Manager(object):
 
     def get_executable_container_instance(self, ec_name):
         return self.executable_containers_instances[ec_name]
-
-
-manager = Manager(config=test_config)
-manager.logger = logging.getLogger()
-manager.initiate_tasks()
-manager.instantiate_tasks()
-manager.initiate_executable_containers()
-manager.instantiate_executable_containers()
-a = 5
