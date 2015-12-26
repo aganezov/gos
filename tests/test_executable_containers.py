@@ -9,7 +9,7 @@ from gos.algo.executable_containers.base_stage import Stage
 from gos.algo.executable_containers.pipeline import Pipeline
 from gos.exceptions import GOSExecutableContainerException, GOSIOException
 from gos.executable_containers import ExecutableContainer
-from manager import Manager
+from gos.manager import Manager
 
 
 class ExecutableContainerTestCase(unittest.TestCase):

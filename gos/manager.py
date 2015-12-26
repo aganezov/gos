@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from executable_containers import ExecutableContainer
 from gos.configuration import Configuration
 from gos.exceptions import GOSTaskException
+from gos.executable_containers import ExecutableContainer
 from gos.tasks import TaskLoader
 
 
