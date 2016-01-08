@@ -144,12 +144,12 @@ class ExecutableContainerTestCase(unittest.TestCase):
     def test_setup_from_file_file_does_not_exists(self):
         non_existing_path = "non_existing_path.py"
         with self.assertRaises(GOSIOException):
-            ExecutableContainer.setup_from_file(non_existing_path, "executable_container")
+            next(ExecutableContainer.setup_from_file(non_existing_path))
 
     def test_setup_from_file_non_python_file(self):
         non_py_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
         with self.assertRaises(GOSIOException):
-            ExecutableContainer.setup_from_file(non_py_file.name, "executable_container")
+            next(ExecutableContainer.setup_from_file(non_py_file.name))
 
     def test_setup_from_file_no_unique_name(self):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
@@ -158,7 +158,7 @@ class ExecutableContainerTestCase(unittest.TestCase):
         tmp_file.flush()
         importlib.invalidate_caches()
         with self.assertRaises(GOSExecutableContainerException):
-            ExecutableContainer.setup_from_file(tmp_file.name, "executable_container")
+            next(ExecutableContainer.setup_from_file(tmp_file.name))
 
     def get_executable_container_import_string(self):
         return """from gos.executable_containers import ExecutableContainer\n"""
@@ -170,16 +170,7 @@ class ExecutableContainerTestCase(unittest.TestCase):
         tmp_file.flush()
         importlib.invalidate_caches()
         with self.assertRaises(GOSExecutableContainerException):
-            ExecutableContainer.setup_from_file(tmp_file.name, "executable_container")
-
-    def test_setup_from_file_no_match_by_name_attribute(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
-        tmp_file.write(self.get_executable_container_import_string())
-        tmp_file.write("""class MyContainer(ExecutableContainer):\n\tname="new_ec_name"\n\tdef setup(self):\n\t\tpass""")
-        tmp_file.flush()
-        importlib.invalidate_caches()
-        with self.assertRaises(GOSExecutableContainerException):
-            ExecutableContainer.setup_from_file(tmp_file.name, container_name="not_new_ec_name")
+            next(ExecutableContainer.setup_from_file(tmp_file.name))
 
     def test_setup_from_file(self):
         tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
@@ -188,10 +179,24 @@ class ExecutableContainerTestCase(unittest.TestCase):
                 """class MyContainer(ExecutableContainer):\n\tname="my_ec"\n\tdef setup(self):\n\t\tself.entries_names = ["entry1"]\n\t\tself.entries_type_names=["task"] """)
         tmp_file.flush()
         importlib.invalidate_caches()
-        result = ExecutableContainer.setup_from_file(tmp_file.name, container_name="my_ec")
+        result = next(ExecutableContainer.setup_from_file(tmp_file.name))
         self.assertIsInstance(result, ExecutableContainer)
         self.assertListEqual(result.entries_names, ["entry1"])
         self.assertListEqual(result.entries_type_names, ["task"])
+
+    def test_setup_from_file_multiple_ex_containers(self):
+        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file.write(self.get_executable_container_import_string())
+        tmp_file.write(
+                """class MyContainerOne(ExecutableContainer):\n\tname="my_ec_1"\n\tdef setup(self):\n\t\tself.entries_names = ["entry1"]\n\t\tself.entries_type_names=["task"]\ndef run(self, manager):\n\t\tpass""")
+        tmp_file.write(
+                """\n\n\nclass MyContainerTwo(ExecutableContainer):\n\tname="my_ec_2"\n\tdef setup(self):\n\t\tself.entries_names = ["entry1"]\n\t\tself.entries_type_names=["task"]\ndef run(self, manager):\n\t\tpass """)
+        tmp_file.flush()
+        importlib.invalidate_caches()
+        result = list(ExecutableContainer.setup_from_file(tmp_file.name))
+        self.assertEqual(len(result), 2)
+        names = {ex.name for ex in result}
+        self.assertSetEqual({"my_ec_1", "my_ec_2"}, names)
 
 
 class BaseStageTestCase(unittest.TestCase):

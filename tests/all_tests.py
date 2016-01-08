@@ -4,9 +4,9 @@ __email__ = "aganezov(at)gwu.edu"
 __status__ = "develop"
 
 import unittest
+
 from teamcity import is_running_under_teamcity
 from teamcity.unittestpy import TeamcityTestRunner
-
 
 if __name__ == '__main__':
     all_tests = unittest.TestLoader().discover('./', pattern='test_*.py')

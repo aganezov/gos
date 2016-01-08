@@ -65,7 +65,8 @@ class ExecutableContainer(object):
         return result
 
     @staticmethod
-    def setup_from_file(file_path, container_name):
+    def setup_from_file(file_path):
+        flag = False
         file_name, module_path, objects = Loader.import_custom_python_file(file_path)
         for entry in objects:
             try:
@@ -77,10 +78,11 @@ class ExecutableContainer(object):
                                 "".format(class_name=entry.name, file_name=os.path.join(module_path, file_name)))
                     elif not hasattr(entry, "setup"):
                         raise GOSExecutableContainerException()
-                    if entry.name == container_name:
-                        result = entry()
-                        result.setup()
-                        return result
+                    flag = True
+                    result = entry()
+                    result.setup()
+                    yield result
             except TypeError:
                 continue
-        raise GOSExecutableContainerException()
+        if not flag:
+            raise GOSExecutableContainerException()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from gos.configuration import Configuration
-from gos.exceptions import GOSTaskException
+from gos.exceptions import GOSTaskException, GOSExecutableContainerException
 from gos.executable_containers import ExecutableContainer
 from gos.tasks import TaskLoader
 
@@ -31,11 +31,20 @@ class Manager(object):
 
     def initiate_executable_containers(self):
         for entry in self.configuration[Configuration.ALGORITHM]["executable_containers"]:
-            reference = entry["reference"]
-            for ec_config in self.configuration[Configuration.ALGORITHM][reference]:
-                ec_config["group_reference_name"] = reference
-                result = ExecutableContainer.setup_from_config(manager=self, config=ec_config)
-                self.executable_containers_instances[result.name] = result
+            if "reference" in entry:
+                reference = entry["reference"]
+                for ec_config in self.configuration[Configuration.ALGORITHM][reference]:
+                    ec_config["group_reference_name"] = reference
+                    result = ExecutableContainer.setup_from_config(manager=self, config=ec_config)
+                    self.executable_containers_instances[result.name] = result
+            elif "paths" in entry:
+                paths = entry["paths"]
+                for path in paths:
+                    try:
+                        for ec_instance in ExecutableContainer.setup_from_file(file_path=path):
+                            self.executable_containers_instances[ec_instance.name] = ec_instance
+                    except GOSExecutableContainerException:
+                        continue
         if "pipeline" not in self.configuration[Configuration.ALGORITHM]["executable_containers"]:
             pipeline_config = self.configuration[Configuration.ALGORITHM]["pipeline"]
             if "name" not in pipeline_config:
