@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 from gos.exceptions import GOSExecutableContainerException
 from gos.utils.load import Loader
 
@@ -72,12 +71,9 @@ class ExecutableContainer(object):
             try:
                 if issubclass(entry, ExecutableContainer) and entry.__name__ != ExecutableContainer.__name__:
                     if entry.name == ExecutableContainer.name:
-                        raise GOSExecutableContainerException(
-                                "Class {class_name} form file {file_name} does not have a unique `name` class field. "
-                                "All custom tasks must have a unique `name` class field for them, tat is used for future reference"
-                                "".format(class_name=entry.name, file_name=os.path.join(module_path, file_name)))
+                        continue
                     elif not hasattr(entry, "setup"):
-                        raise GOSExecutableContainerException()
+                        continue
                     flag = True
                     result = entry()
                     result.setup()
