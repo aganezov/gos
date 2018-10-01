@@ -14,7 +14,7 @@ setup(name="gos",
       author_email="aganezov@cs.jhu.edu",
       description="Generically organizable supervisor to create multi-level executable pipelines",
       license="MIT",
-      keywords=["breakpoint graph", "data structures", "python", "scaffolding", "gene order"],
+      keywords=["pipeline", "data structures", "python"],
       url="https://github.com/aganezov/gos",
       classifiers=[
           "Development Status :: 4 - Beta",
