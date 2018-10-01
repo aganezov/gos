@@ -52,7 +52,7 @@ class TaskLoader(object):
         if os.path.isfile(dir_path):
             raise GOSTaskException()
         result = {}
-        for file_basename in os.listdir(path=dir_path):
+        for file_basename in os.listdir(dir_path):
             full_file_path = os.path.join(dir_path, file_basename)
             try:
                 result.update(self.load_tasks_from_file(full_file_path))

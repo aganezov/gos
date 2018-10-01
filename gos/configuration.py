@@ -186,7 +186,7 @@ class Configuration(dict):
     DEFAULT_LOGGER_DESTINATION = None
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(Configuration, self).__init__(*args, **kwargs)
         self._init_top_level_fields()
         self._init_logger_top_level_section()
         self._init_input_section()

@@ -1,11 +1,26 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-import importlib
 import os
-import tempfile
+import sys
+if sys.version_info[0] >= 3:
+    from tempfile import *
+else:
+    from tempfile import *
+    from backports import tempfile
+    TemporaryDirectory = tempfile.TemporaryDirectory
 from gos.exceptions import GOSTaskException, GOSIOException
 from gos.tasks import BaseTask, TaskLoader
+
+
+def invalidate_caches():
+    pass
+
+try:
+    import importlib
+    invalidate_caches = importlib.invalidate_caches
+except (ImportError, AttributeError):
+    pass
 
 
 class BaseTaskTestCase(unittest.TestCase):
@@ -47,15 +62,15 @@ class TaskLoaderTestCase(unittest.TestCase):
         source_file.write(self.get_base_task_import_code_string())
         source_file.write(bad_class_code)
         source_file.flush()
-        importlib.invalidate_caches()  # importlib invalidate_caches call is required due to this python issue: http://bugs.python.org/issue23412
+        invalidate_caches()  # invalidate_caches() call is required due to this python issue: http://bugs.python.org/issue23412
         source_file_name = source_file.name
         with self.assertRaises(GOSTaskException):
             TaskLoader().load_tasks_from_file(source_file_name)
         source_file.close()
 
     def test_load_from_file_non_python_file(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
-        importlib.invalidate_caches()
+        tmp_file = NamedTemporaryFile(mode="wt", suffix=".non_py")
+        invalidate_caches()
         with self.assertRaises(GOSIOException):
             TaskLoader().load_tasks_from_file(tmp_file.name)
 
@@ -89,19 +104,19 @@ class TaskLoaderTestCase(unittest.TestCase):
         ]
 
     def test_load_from_file_single_custom_task_class(self):
-        with tempfile.NamedTemporaryFile(mode="wt", suffix=".py") as source_file:
+        with NamedTemporaryFile(mode="wt", suffix=".py") as source_file:
             custom_task_file_data = self.get_custom_task_files_values()[0]
             source_file.write(self.get_base_task_import_code_string())
             source_file.write(custom_task_file_data)
             source_file.flush()
-            importlib.invalidate_caches()
+            invalidate_caches()
             source_file_name = source_file.name
             result = TaskLoader().load_tasks_from_file(source_file_name)
             self.assertIn("my_task_one", result)
             self.assertTrue(issubclass(result["my_task_one"], BaseTask))
 
     def create_tmp_py_file(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file = NamedTemporaryFile(mode="wt", suffix=".py")
         return tmp_file
 
     def test_load_from_file_multiple_custom_tasks_classes(self):
@@ -111,7 +126,7 @@ class TaskLoaderTestCase(unittest.TestCase):
             source_file.write(custom_task_code_string)
         source_file.write(self.get_custom_non_task_classes_code_strings()[0])
         source_file.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         source_file_name = source_file.name
         result = TaskLoader().load_tasks_from_file(source_file_name)
         for task_name in ["my_task_one", "my_task_two", "my_task_three"]:
@@ -126,18 +141,18 @@ class TaskLoaderTestCase(unittest.TestCase):
             TaskLoader().load_tasks_from_dir(non_existing_dir)
 
     def test_load_from_dir_file_supplied(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode="wt")
+        tmp_file = NamedTemporaryFile(mode="wt")
         with self.assertRaises(GOSTaskException):
             TaskLoader().load_tasks_from_dir(tmp_file.name)
 
     def test_load_from_dir_single_file_with_multiple_classes(self):
-        tmp_dir = tempfile.TemporaryDirectory()
-        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_dir = TemporaryDirectory()
+        tmp_file1 = NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
         tmp_file1.write(self.get_base_task_import_code_string())
         for task_class_string in self.get_custom_task_files_values():
             tmp_file1.write(task_class_string)
         tmp_file1.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         result = TaskLoader().load_tasks_from_dir(tmp_dir.name)
         for task_name in ["my_task_one", "my_task_two", "my_task_three"]:
             self.assertIn(task_name, result)
@@ -145,21 +160,21 @@ class TaskLoaderTestCase(unittest.TestCase):
         tmp_dir.cleanup()
 
     def test_load_from_dir_non_python_file(self):
-        tmp_dir = tempfile.TemporaryDirectory()
-        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py", dir=tmp_dir.name, delete=False)
+        tmp_dir = TemporaryDirectory()
+        tmp_file1 = NamedTemporaryFile(mode="wt", suffix=".non_py", dir=tmp_dir.name, delete=False)
         tmp_file1.write(self.get_base_task_import_code_string())
         for task_class_string in self.get_custom_task_files_values():
             tmp_file1.write(task_class_string)
         tmp_file1.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         result = TaskLoader().load_tasks_from_dir(tmp_dir.name)
         self.assertDictEqual(result, {})
         tmp_dir.cleanup()
 
     def test_load_from_dir_multiple_python_files(self):
-        tmp_dir = tempfile.TemporaryDirectory()
-        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
-        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_dir = TemporaryDirectory()
+        tmp_file1 = NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_file2 = NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
         tmp_file1.write(self.get_base_task_import_code_string())
         tmp_file2.write(self.get_base_task_import_code_string())
         for tasks_class_strings in self.get_custom_task_files_values()[:1]:
@@ -168,7 +183,7 @@ class TaskLoaderTestCase(unittest.TestCase):
         for tasks_class_strings in self.get_custom_task_files_values()[1:]:
             tmp_file2.write(tasks_class_strings)
         tmp_file2.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         result = TaskLoader().load_tasks_from_dir(tmp_dir.name)
         for task_name in ["my_task_one", "my_task_two", "my_task_three"]:
             self.assertIn(task_name, result)
@@ -180,8 +195,8 @@ class TaskLoaderTestCase(unittest.TestCase):
             TaskLoader().load_tasks(5)
 
     def test_load_tasks_only_python_files(self):
-        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
-        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file1 = NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file2 = NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file1.write(self.get_base_task_import_code_string())
         tmp_file2.write(self.get_base_task_import_code_string())
         for tasks_class_strings in self.get_custom_task_files_values()[:1]:
@@ -190,7 +205,7 @@ class TaskLoaderTestCase(unittest.TestCase):
         for tasks_class_strings in self.get_custom_task_files_values()[1:]:
             tmp_file2.write(tasks_class_strings)
         tmp_file2.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         paths = [tmp_file1.name, tmp_file2.name]
         result = TaskLoader().load_tasks(paths=paths)
         for task_name in ["my_task_one", "my_task_two", "my_task_three"]:
@@ -203,9 +218,9 @@ class TaskLoaderTestCase(unittest.TestCase):
             TaskLoader().load_tasks(paths=paths)
 
     def test_load_tasks_only_files_some_files_are_non_python(self):
-        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
-        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
-        tmp_file3 = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
+        tmp_file1 = NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file2 = NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file3 = NamedTemporaryFile(mode="wt", suffix=".non_py")
         tmp_file1.write(self.get_base_task_import_code_string())
         tmp_file2.write(self.get_base_task_import_code_string())
         tmp_file3.write(self.get_base_task_import_code_string())
@@ -218,7 +233,7 @@ class TaskLoaderTestCase(unittest.TestCase):
         for tasks_class_strings in self.get_custom_task_files_values()[2:]:
             tmp_file3.write(tasks_class_strings)
         tmp_file3.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         paths = [tmp_file1.name, tmp_file2.name, tmp_file3.name]
         result = TaskLoader().load_tasks(paths=paths)
         for task_name in ["my_task_one", "my_task_two"]:
@@ -227,18 +242,18 @@ class TaskLoaderTestCase(unittest.TestCase):
         self.assertNotIn("my_task_three", result)
 
     def test_load_tasks_files_and_dirs(self):
-        tmp_dir1 = tempfile.TemporaryDirectory()
-        tmp_dir2 = tempfile.TemporaryDirectory()
+        tmp_dir1 = TemporaryDirectory()
+        tmp_dir2 = TemporaryDirectory()
 
-        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir1.name, delete=False)
-        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir1.name, delete=False)
-        tmp_file3 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir1.name, delete=False)
+        tmp_file1 = NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir1.name, delete=False)
+        tmp_file2 = NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir1.name, delete=False)
+        tmp_file3 = NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir1.name, delete=False)
 
-        tmp_file4 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir2.name, delete=False)
-        tmp_file5 = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py", dir=tmp_dir2.name, delete=False)
+        tmp_file4 = NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir2.name, delete=False)
+        tmp_file5 = NamedTemporaryFile(mode="wt", suffix=".non_py", dir=tmp_dir2.name, delete=False)
 
-        tmp_file6 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
-        tmp_file7 = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
+        tmp_file6 = NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file7 = NamedTemporaryFile(mode="wt", suffix=".non_py")
 
         tmp_files = [tmp_file1, tmp_file2, tmp_file3, tmp_file4, tmp_file5, tmp_file6, tmp_file7]
 
@@ -246,7 +261,7 @@ class TaskLoaderTestCase(unittest.TestCase):
             tmp_file.write(self.get_base_task_import_code_string())
             tmp_file.write(self.get_custom_task_files_values()[cnt])
             tmp_file.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         paths = [tmp_dir1.name, tmp_dir2.name, tmp_file6.name, tmp_file7.name]
         result = TaskLoader().load_tasks(paths=paths)
         for task_name in ["my_task_one", "my_task_two", "my_task_three", "my_task_four", "my_task_six"]:
@@ -264,16 +279,16 @@ class TaskLoaderTestCase(unittest.TestCase):
         tmp_dir.cleanup()
 
     def _prepare_for_TaskException_propagation_test(self):
-        tmp_dir = tempfile.TemporaryDirectory()
-        tmp_file1 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
-        tmp_file2 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_dir = TemporaryDirectory()
+        tmp_file1 = NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
+        tmp_file2 = NamedTemporaryFile(mode="wt", suffix=".py", dir=tmp_dir.name, delete=False)
         tmp_file1.write(self.get_base_task_import_code_string())
         tmp_file1.write(self.get_custom_task_files_values()[0])
         tmp_file1.flush()
         tmp_file2.write(self.get_base_task_import_code_string())
         tmp_file2.write("""class Task(BaseTask):\n\tdef run(self, assembler_manager):\n\t\tpass\n""")
         tmp_file2.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         return tmp_dir
 
     def test_load_tasks_from_dir_no_TaskException_propagation(self):
@@ -284,22 +299,22 @@ class TaskLoaderTestCase(unittest.TestCase):
 
     def test_load_tasks_TaskException_propagation(self):
         tmp_dir = self._prepare_for_TaskException_propagation_test()
-        tmp_file3 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", delete=True)
+        tmp_file3 = NamedTemporaryFile(mode="wt", suffix=".py", delete=True)
         tmp_file3.write(self.get_base_task_import_code_string())
         tmp_file3.write(self.get_custom_task_files_values()[1])
         tmp_file3.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         with self.assertRaises(GOSTaskException):
             TaskLoader().load_tasks(paths=[tmp_dir.name, tmp_file3.name], propagate_exception=True)
         tmp_dir.cleanup()
 
     def test_load_tasks_no_TaskException_propagation(self):
         tmp_dir = self._prepare_for_TaskException_propagation_test()
-        tmp_file3 = tempfile.NamedTemporaryFile(mode="wt", suffix=".py", delete=True)
+        tmp_file3 = NamedTemporaryFile(mode="wt", suffix=".py", delete=True)
         tmp_file3.write(self.get_base_task_import_code_string())
         tmp_file3.write(self.get_custom_task_files_values()[1])
         tmp_file3.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         result = TaskLoader().load_tasks(paths=[tmp_dir.name, tmp_file3.name], propagate_exception=False)
         self.assertEqual(len(result), 3)  # base + two valid tasks
         self.assertIn("my_task_one", result)

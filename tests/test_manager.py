@@ -1,14 +1,32 @@
 # -*- coding: utf-8 -*-
 import unittest
+import sys
 
-import importlib
-import tempfile
+if sys.version_info[0] >= 3:
+    from tempfile import *
+else:
+    from tempfile import *
+    from backports import tempfile
+    TemporaryDirectory = tempfile.TemporaryDirectory
 from gos.configuration import Configuration
 from gos.exceptions import GOSTaskException
 from gos.manager import Manager
 from gos.tasks import BaseTask, TaskLoader
 from tests.test_tasks import TaskLoaderTestCase
 
+
+def invalidate_caches():
+    pass
+
+try:
+    import importlib
+    invalidate_caches = importlib.invalidate_caches
+except (ImportError, AttributeError):
+    pass
+
+
+def runTest(self):
+    pass
 
 class ManagerTestCase(unittest.TestCase):
     def setUp(self):
@@ -21,9 +39,11 @@ class ManagerTestCase(unittest.TestCase):
 
     def create_correct_temporary_tasks_files(self):
         result = []
-        tltc = TaskLoaderTestCase()
+        from tests import test_tasks
+        test_tasks.TaskLoaderTestCase.runTest = runTest
+        tltc = test_tasks.TaskLoaderTestCase()
         for task_string_data in tltc.get_custom_task_files_values():
-            tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+            tmp_file = NamedTemporaryFile(mode="wt", suffix=".py")
             tmp_file.write(tltc.get_base_task_import_code_string())
             tmp_file.write(task_string_data)
             tmp_file.flush()
@@ -37,7 +57,7 @@ class ManagerTestCase(unittest.TestCase):
         self.am.configuration[Configuration.ALGORITHM][Configuration.TASKS] = {
             Configuration.PATHS: [f.name for f in tmp_files]
         }
-        importlib.invalidate_caches()
+        invalidate_caches()
         self.am.initiate_tasks()
         self.assertTrue(hasattr(self.am, "tasks_classes"))
         self.assertTrue(isinstance(self.am.tasks_classes, dict))
@@ -53,7 +73,7 @@ class ManagerTestCase(unittest.TestCase):
     def get_tasks_classes(self):
         tmp_files = self.create_correct_temporary_tasks_files()
         paths = [f.name for f in tmp_files]
-        importlib.invalidate_caches()
+        invalidate_caches()
         return TaskLoader().load_tasks(paths=paths)
 
     def test_manager_instantiate_tasks_error_task_instantiation_no_silent_fail(self):

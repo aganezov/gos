@@ -1,15 +1,31 @@
 # -*- coding: utf-8 -*-
 import logging
 import unittest
+import sys
 
-import importlib
-import tempfile
+if sys.version_info[0] >= 3:
+    from tempfile import *
+else:
+    from tempfile import *
+    from backports import tempfile
+    TemporaryDirectory = tempfile.TemporaryDirectory
 from gos.algo.executable_containers.base_round import Round
 from gos.algo.executable_containers.base_stage import Stage
 from gos.algo.executable_containers.pipeline import Pipeline
 from gos.exceptions import GOSExecutableContainerException, GOSIOException
 from gos.executable_containers import ExecutableContainer
 from gos.manager import Manager
+
+
+def invalidate_caches():
+    pass
+
+
+try:
+    import importlib
+    invalidate_caches = importlib.invalidate_caches
+except (ImportError, AttributeError):
+    pass
 
 
 class ExecutableContainerTestCase(unittest.TestCase):
@@ -147,16 +163,16 @@ class ExecutableContainerTestCase(unittest.TestCase):
             next(ExecutableContainer.setup_from_file(non_existing_path))
 
     def test_setup_from_file_non_python_file(self):
-        non_py_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".non_py")
+        non_py_file = NamedTemporaryFile(mode="wt", suffix=".non_py")
         with self.assertRaises(GOSIOException):
             next(ExecutableContainer.setup_from_file(non_py_file.name))
 
     def test_setup_from_file_no_unique_name(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file = NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file.write(self.get_executable_container_import_string())
         tmp_file.write("""class MyContainer(ExecutableContainer):\n\tdef setup(self):\n\t\tpass""")
         tmp_file.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         with self.assertRaises(GOSExecutableContainerException):
             next(ExecutableContainer.setup_from_file(tmp_file.name))
 
@@ -164,35 +180,35 @@ class ExecutableContainerTestCase(unittest.TestCase):
         return """from gos.executable_containers import ExecutableContainer\n"""
 
     def test_setup_from_file_no_setup_method(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file = NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file.write(self.get_executable_container_import_string())
         tmp_file.write("""class MyContainer(ExecutableContainer):\n\tname="new_executable_container_name" """)
         tmp_file.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         with self.assertRaises(GOSExecutableContainerException):
             next(ExecutableContainer.setup_from_file(tmp_file.name))
 
     def test_setup_from_file(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file = NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file.write(self.get_executable_container_import_string())
         tmp_file.write(
                 """class MyContainer(ExecutableContainer):\n\tname="my_ec"\n\tdef setup(self):\n\t\tself.entries_names = ["entry1"]\n\t\tself.entries_type_names=["task"] """)
         tmp_file.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         result = next(ExecutableContainer.setup_from_file(tmp_file.name))
         self.assertIsInstance(result, ExecutableContainer)
         self.assertListEqual(result.entries_names, ["entry1"])
         self.assertListEqual(result.entries_type_names, ["task"])
 
     def test_setup_from_file_multiple_ex_containers(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode="wt", suffix=".py")
+        tmp_file = NamedTemporaryFile(mode="wt", suffix=".py")
         tmp_file.write(self.get_executable_container_import_string())
         tmp_file.write(
                 """class MyContainerOne(ExecutableContainer):\n\tname="my_ec_1"\n\tdef setup(self):\n\t\tself.entries_names = ["entry1"]\n\t\tself.entries_type_names=["task"]\ndef run(self, manager):\n\t\tpass""")
         tmp_file.write(
                 """\n\n\nclass MyContainerTwo(ExecutableContainer):\n\tname="my_ec_2"\n\tdef setup(self):\n\t\tself.entries_names = ["entry1"]\n\t\tself.entries_type_names=["task"]\ndef run(self, manager):\n\t\tpass """)
         tmp_file.flush()
-        importlib.invalidate_caches()
+        invalidate_caches()
         result = list(ExecutableContainer.setup_from_file(tmp_file.name))
         self.assertEqual(len(result), 2)
         names = {ex.name for ex in result}
