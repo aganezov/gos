@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 
-import sys
-
 __author__ = "aganezov"
-__email__ = "aganezov(at)gwu.edu"
+__email__ = "aganezov(at)cs.jhu.edu"
 __status__ = "development"
 
 

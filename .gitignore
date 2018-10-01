@@ -38,6 +38,9 @@ htmlcov/
 .coverage
 .cache
 nosetests.xml
+tmp/
+tmp_utils/
+draft/
 coverage.xml
 
 # Translations
