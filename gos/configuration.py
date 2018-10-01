@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 
-__author__ = "aganezov"
-__email__ = "aganezov(at)cs.jhu.edu"
-__status__ = "development"
-
 
 class Configuration(dict):
     """
