@@ -41,6 +41,7 @@ before_install:
 install:
   - pip install coveralls
   - pip install pytest-cov
+  - pip install backports.tempfile
   - python setup.py develop
 
 script:
